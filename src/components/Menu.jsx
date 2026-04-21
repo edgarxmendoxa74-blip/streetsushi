@@ -1,26 +1,108 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { menuData, categories } from '../data/menu';
-import { Info } from 'lucide-react';
+import { Info, ChevronLeft, ChevronRight } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 const Menu = () => {
   const [activeCategory, setActiveCategory] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedItem, setSelectedItem] = useState(null);
+  const [menuItems, setMenuItems] = useState([]);
+  const [categories, setCategories] = useState(["All"]);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+  const scrollRef = useRef(null);
 
-  const filteredItems = activeCategory === "All" 
-    ? menuData 
-    : menuData.filter(item => item.category === activeCategory);
+  useEffect(() => {
+    const fetchMenu = async () => {
+      const { data: catData } = await supabase.from('categories').select('name');
+      if (catData) {
+        setCategories(["All", ...catData.map(c => c.name)]);
+      }
+
+      const { data: itemData } = await supabase
+        .from('menu_items')
+        .select(`
+          id, name, price, description, image_url, is_featured,
+          categories ( name ),
+          menu_item_ingredients ( ingredients ( name ) )
+        `);
+      
+      if (itemData) {
+        const formattedData = itemData.map(item => ({
+          id: item.id,
+          name: item.name,
+          category: item.categories?.name,
+          price: item.price,
+          description: item.description,
+          ingredients: item.menu_item_ingredients?.map(mi => mi.ingredients?.name) || [],
+          image: item.image_url,
+          featured: item.is_featured
+        }));
+        setMenuItems(formattedData);
+      }
+    };
+    
+    fetchMenu();
+  }, []);
+
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setCanScrollLeft(scrollLeft > 10);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const scrollAmount = 300;
+      scrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const filteredItems = menuItems.filter(item => {
+    const matchesCategory = activeCategory === "All" || item.category === activeCategory;
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          item.ingredients.some(ing => ing.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <section id="menu" className="menu-section">
-      <div className="section-header">
+      <div className="section-header reveal-up">
         <span className="subtitle">Exploration</span>
         <h2>Our <span>Menu</span></h2>
+        <div className="search-container glass">
+          <input 
+            type="text" 
+            placeholder="Search our flavors..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
       </div>
 
       <div className="filter-wrapper">
+        <AnimatePresence>
+          {canScrollLeft && (
+            <motion.button 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              className="scroll-btn left" 
+              onClick={() => scroll('left')}
+            >
+              <ChevronLeft size={20} />
+            </motion.button>
+          )}
+        </AnimatePresence>
+        
         <motion.div 
           className="filter-container"
+          ref={scrollRef}
+          onScroll={handleScroll}
           whileTap={{ cursor: "grabbing" }}
         >
           {categories.map(cat => (
@@ -33,25 +115,40 @@ const Menu = () => {
             </button>
           ))}
         </motion.div>
+
+        <AnimatePresence>
+          {canScrollRight && (
+            <motion.button 
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+              className="scroll-btn right" 
+              onClick={() => scroll('right')}
+            >
+              <ChevronRight size={20} />
+            </motion.button>
+          )}
+        </AnimatePresence>
       </div>
 
       <motion.div layout className="menu-grid">
         <AnimatePresence mode='popLayout'>
-          {filteredItems.map(item => (
+          {filteredItems.map((item, index) => (
             <motion.div 
               layout
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.5, delay: index * 0.05 }}
               key={item.id} 
-              className="menu-card"
+              className={`menu-card ${item.featured ? 'featured-card animate-float' : ''}`}
             >
-              <div className="card-image">
+              <div className="card-image shimmer">
                 <img src={item.image} alt={item.name} />
                 <div className="card-overlay" onClick={() => setSelectedItem(item)}>
                   <Info size={24} />
                 </div>
+                {item.featured && <span className="featured-badge">Chef's Choice</span>}
               </div>
               <div className="card-info">
                 <div className="card-header">
@@ -133,11 +230,56 @@ const Menu = () => {
           color: var(--neon-red);
         }
 
+        .search-container {
+          max-width: 500px;
+          margin: 30px auto 0;
+          padding: 5px 10px;
+          border-radius: 50px;
+          display: flex;
+          align-items: center;
+        }
+
+        .search-container input {
+          width: 100%;
+          padding: 12px 20px;
+          background: transparent;
+          border: none;
+          color: white;
+          font-family: inherit;
+          font-size: 1rem;
+          outline: none;
+        }
+
+        .search-container input::placeholder {
+          color: rgba(255,255,255,0.3);
+        }
+
         .filter-wrapper {
           position: relative;
           margin-bottom: 60px;
           padding: 10px 0;
           overflow: hidden;
+        }
+
+        .featured-card {
+           border-color: var(--neon-red) !important;
+           box-shadow: 0 0 30px rgba(255, 49, 49, 0.15);
+        }
+
+        .featured-badge {
+          position: absolute;
+          top: 15px;
+          right: 15px;
+          background: var(--neon-red);
+          color: white;
+          padding: 5px 12px;
+          border-radius: 4px;
+          font-size: 0.7rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          z-index: 5;
+          box-shadow: 0 0 15px rgba(255, 49, 49, 0.5);
         }
 
         .filter-wrapper::before,
@@ -161,6 +303,39 @@ const Menu = () => {
           background: linear-gradient(-90deg, #0d0d0d 10%, transparent 100%);
         }
 
+        .scroll-btn {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 10;
+          background: #111;
+          color: var(--ghost-white);
+          border: 1px solid var(--glass-border);
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: var(--transition);
+        }
+        
+        .scroll-btn:hover {
+          background: var(--neon-red);
+          color: white;
+          border-color: var(--neon-red);
+          box-shadow: 0 0 10px var(--accent-red-glow);
+        }
+
+        .scroll-btn.left {
+          left: 10px;
+        }
+
+        .scroll-btn.right {
+          right: 10px;
+        }
+
         .filter-container {
           display: flex;
           gap: 15px;
@@ -176,6 +351,9 @@ const Menu = () => {
           .filter-container {
             justify-content: flex-start;
             padding: 10px 40px; /* More padding on mobile for the fade effect */
+          }
+          .scroll-btn {
+            display: none; /* Mobile users prefer swiping naturally */
           }
         }
 
@@ -207,8 +385,8 @@ const Menu = () => {
 
         .menu-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-          gap: 40px;
+          grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+          gap: 30px;
         }
 
         .menu-card {
@@ -217,18 +395,37 @@ const Menu = () => {
           overflow: hidden;
           border: 1px solid var(--glass-border);
           transition: var(--transition);
+          display: flex;
+          height: 200px;
+        }
+
+        @media (max-width: 600px) {
+          .menu-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+          }
+          .menu-card {
+            height: 160px;
+          }
         }
 
         .menu-card:hover {
-          transform: translateY(-10px);
+          transform: translateY(-5px);
           border-color: rgba(255, 49, 49, 0.3);
           box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .card-image {
           position: relative;
-          height: 250px;
+          width: 180px;
+          flex-shrink: 0;
           overflow: hidden;
+        }
+
+        @media (max-width: 600px) {
+          .card-image {
+            width: 130px;
+          }
         }
 
         .card-image img {
@@ -262,49 +459,62 @@ const Menu = () => {
         }
 
         .card-info {
-          padding: 25px;
+          padding: 20px;
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
         }
 
         .card-header {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          margin-bottom: 12px;
+          gap: 10px;
         }
 
         .card-header h3 {
-          font-size: 1.4rem;
-          letter-spacing: 1px;
+          font-size: 1.1rem;
+          letter-spacing: 0.5px;
+          line-height: 1.2;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
 
         .price {
           color: var(--neon-red);
           font-weight: 700;
-          font-size: 1.1rem;
+          font-size: 1rem;
+          white-space: nowrap;
         }
 
         .card-info p {
           color: var(--muted-gray);
-          font-size: 0.9rem;
-          line-height: 1.6;
-          margin-bottom: 25px;
-          height: 45px;
+          font-size: 0.85rem;
+          line-height: 1.4;
+          margin: 10px 0;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
           overflow: hidden;
+          flex-grow: 1;
         }
 
         .details-btn {
-          width: 100%;
+          width: fit-content;
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 10px;
           border: 1px solid var(--neon-red);
           color: var(--neon-red);
-          padding: 12px;
-          border-radius: 6px;
+          padding: 8px 16px;
+          border-radius: 4px;
           font-weight: 700;
           text-transform: uppercase;
-          font-size: 0.8rem;
+          font-size: 0.7rem;
           transition: var(--transition);
         }
 
