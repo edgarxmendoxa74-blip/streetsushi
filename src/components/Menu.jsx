@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -71,7 +70,7 @@ const Menu = () => {
 
   return (
     <section id="menu" className="menu-section">
-      <div className="section-header reveal-up">
+      <div className="section-header">
         <span className="subtitle">Exploration</span>
         <h2>Our <span>Menu</span></h2>
         <div className="search-container glass">
@@ -85,25 +84,19 @@ const Menu = () => {
       </div>
 
       <div className="filter-wrapper">
-        <AnimatePresence>
-          {canScrollLeft && (
-            <motion.button 
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              className="scroll-btn left" 
-              onClick={() => scroll('left')}
-            >
-              <ChevronLeft size={20} />
-            </motion.button>
-          )}
-        </AnimatePresence>
+        {canScrollLeft && (
+          <button 
+            className="scroll-btn left" 
+            onClick={() => scroll('left')}
+          >
+            <ChevronLeft size={20} />
+          </button>
+        )}
         
-        <motion.div 
+        <div 
           className="filter-container"
           ref={scrollRef}
           onScroll={handleScroll}
-          whileTap={{ cursor: "grabbing" }}
         >
           {categories.map(cat => (
             <button 
@@ -114,102 +107,82 @@ const Menu = () => {
               {cat}
             </button>
           ))}
-        </motion.div>
+        </div>
 
-        <AnimatePresence>
-          {canScrollRight && (
-            <motion.button 
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              className="scroll-btn right" 
-              onClick={() => scroll('right')}
-            >
-              <ChevronRight size={20} />
-            </motion.button>
-          )}
-        </AnimatePresence>
+        {canScrollRight && (
+          <button 
+            className="scroll-btn right" 
+            onClick={() => scroll('right')}
+          >
+            <ChevronRight size={20} />
+          </button>
+        )}
       </div>
 
-      <motion.div layout className="menu-grid">
-        <AnimatePresence mode='popLayout'>
-          {filteredItems.map((item, index) => (
-            <motion.div 
-              layout
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.5, delay: index * 0.05 }}
-              key={item.id} 
-              className={`menu-card ${item.featured ? 'featured-card animate-float' : ''}`}
-            >
-              <div className="card-image shimmer">
-                <img src={item.image} alt={item.name} />
-                <div className="card-overlay" onClick={() => setSelectedItem(item)}>
-                  <Info size={24} />
-                </div>
-                {item.featured && <span className="featured-badge">Chef's Choice</span>}
+      <div className="menu-grid">
+        {filteredItems.map((item) => (
+          <div 
+            key={item.id} 
+            className={`menu-card ${item.featured ? 'featured-card' : ''}`}
+          >
+            <div className="card-image">
+              <img src={item.image} alt={item.name} />
+              <div className="card-overlay" onClick={() => setSelectedItem(item)}>
+                <Info size={24} />
               </div>
-              <div className="card-info">
-                <div className="card-header">
-                  <h3>{item.name}</h3>
-                  <span className="price">${item.price.toFixed(2)}</span>
-                </div>
-                <p>{item.description}</p>
-                <button className="details-btn" onClick={() => setSelectedItem(item)}>
-                  View Details
-                </button>
+              {item.featured && <span className="featured-badge">Chef's Choice</span>}
+            </div>
+            <div className="card-info">
+              <div className="card-header">
+                <h3>{item.name}</h3>
+                <span className="price">${item.price.toFixed(2)}</span>
               </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </motion.div>
+              <p>{item.description}</p>
+              <button className="details-btn" onClick={() => setSelectedItem(item)}>
+                View Details
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
 
       {/* Item Detail Modal */}
-      <AnimatePresence>
-        {selectedItem && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="modal-overlay"
-            onClick={() => setSelectedItem(null)}
+      {selectedItem && (
+        <div 
+          className="modal-overlay"
+          onClick={() => setSelectedItem(null)}
+        >
+          <div 
+            className="modal-content glass"
+            onClick={e => e.stopPropagation()}
           >
-            <motion.div 
-              initial={{ y: 100, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 100, opacity: 0 }}
-              className="modal-content glass"
-              onClick={e => e.stopPropagation()}
-            >
-              <button className="close-modal" onClick={() => setSelectedItem(null)}>&times;</button>
-              <div className="modal-body">
-                <div className="modal-img">
-                  <img src={selectedItem.image} alt={selectedItem.name} />
+            <button className="close-modal" onClick={() => setSelectedItem(null)}>&times;</button>
+            <div className="modal-body">
+              <div className="modal-img">
+                <img src={selectedItem.image} alt={selectedItem.name} />
+              </div>
+              <div className="modal-info">
+                <span className="category-tag">{selectedItem.category}</span>
+                <h2>{selectedItem.name}</h2>
+                <p className="modal-desc">{selectedItem.description}</p>
+                
+                <div className="ingredients">
+                  <h4>Ingredients</h4>
+                  <div className="tags">
+                    {selectedItem.ingredients.map(ing => (
+                      <span key={ing} className="tag">{ing}</span>
+                    ))}
+                  </div>
                 </div>
-                <div className="modal-info">
-                  <span className="category-tag">{selectedItem.category}</span>
-                  <h2>{selectedItem.name}</h2>
-                  <p className="modal-desc">{selectedItem.description}</p>
-                  
-                  <div className="ingredients">
-                    <h4>Ingredients</h4>
-                    <div className="tags">
-                      {selectedItem.ingredients.map(ing => (
-                        <span key={ing} className="tag">{ing}</span>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="modal-footer">
-                    <span className="modal-price">${selectedItem.price.toFixed(2)}</span>
-                  </div>
+                
+                <div className="modal-footer">
+                  <span className="modal-price">${selectedItem.price.toFixed(2)}</span>
                 </div>
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style jsx="true">{`
         .menu-section {
@@ -318,7 +291,6 @@ const Menu = () => {
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          transition: var(--transition);
         }
         
         .scroll-btn:hover {
@@ -385,8 +357,8 @@ const Menu = () => {
 
         .menu-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-          gap: 30px;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: 40px;
         }
 
         .menu-card {
@@ -394,49 +366,29 @@ const Menu = () => {
           border-radius: 12px;
           overflow: hidden;
           border: 1px solid var(--glass-border);
-          transition: var(--transition);
-          display: flex;
-          height: 200px;
         }
 
         @media (max-width: 600px) {
           .menu-grid {
-            grid-template-columns: 1fr;
             gap: 20px;
-          }
-          .menu-card {
-            height: 160px;
           }
         }
 
         .menu-card:hover {
-          transform: translateY(-5px);
           border-color: rgba(255, 49, 49, 0.3);
           box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .card-image {
           position: relative;
-          width: 180px;
-          flex-shrink: 0;
+          height: 250px;
           overflow: hidden;
-        }
-
-        @media (max-width: 600px) {
-          .card-image {
-            width: 130px;
-          }
         }
 
         .card-image img {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .menu-card:hover .card-image img {
-          transform: scale(1.1);
         }
 
         .card-overlay {
@@ -450,7 +402,6 @@ const Menu = () => {
           align-items: center;
           justify-content: center;
           opacity: 0;
-          transition: var(--transition);
           cursor: pointer;
         }
 
@@ -459,63 +410,49 @@ const Menu = () => {
         }
 
         .card-info {
-          padding: 20px;
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
+          padding: 25px;
         }
 
         .card-header {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          gap: 10px;
+          margin-bottom: 12px;
         }
 
         .card-header h3 {
-          font-size: 1.1rem;
-          letter-spacing: 0.5px;
-          line-height: 1.2;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
+          font-size: 1.4rem;
+          letter-spacing: 1px;
         }
 
         .price {
           color: var(--neon-red);
           font-weight: 700;
-          font-size: 1rem;
-          white-space: nowrap;
+          font-size: 1.1rem;
         }
 
         .card-info p {
           color: var(--muted-gray);
-          font-size: 0.85rem;
-          line-height: 1.4;
-          margin: 10px 0;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
+          font-size: 0.9rem;
+          line-height: 1.6;
+          margin-bottom: 25px;
+          height: 45px;
           overflow: hidden;
-          flex-grow: 1;
         }
 
         .details-btn {
-          width: fit-content;
+          width: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 10px;
           border: 1px solid var(--neon-red);
           color: var(--neon-red);
-          padding: 8px 16px;
-          border-radius: 4px;
+          padding: 12px;
+          border-radius: 6px;
           font-weight: 700;
           text-transform: uppercase;
-          font-size: 0.7rem;
-          transition: var(--transition);
+          font-size: 0.8rem;
         }
 
         .details-btn:hover {

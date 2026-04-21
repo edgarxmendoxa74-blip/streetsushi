@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 
 const Hero = () => {
@@ -42,37 +41,26 @@ const Hero = () => {
     <section id="hero" className="hero-split">
       {/* Left Side: Slideshow */}
       <div className="hero-left">
-        <AnimatePresence mode="wait">
-          {slides.length > 0 ? (
-            <motion.div
-              key={currentSlide}
-              initial={{ opacity: 0, scale: 1.1 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1.5, ease: "easeInOut" }}
-              className="slide-image"
-              style={{ backgroundImage: `url(${slides[currentSlide]})` }}
-            />
-          ) : (
-             <div className="slide-placeholder shimmer" />
-          )}
-        </AnimatePresence>
+        {slides.length > 0 ? (
+          <div
+            key={currentSlide}
+            className="slide-image"
+            style={{ backgroundImage: `url(${slides[currentSlide]})` }}
+          />
+        ) : (
+          <div className="slide-placeholder" />
+        )}
         <div className="hero-overlay-gradient"></div>
       </div>
 
       {/* Right Side: Branding */}
       <div className="hero-right">
-        <motion.div 
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="hero-text-content"
-        >
+        <div className="hero-text-content">
           <span className="subtitle-brand">{settings.subtitle}</span>
           <h1 className="hero-title">{settings.title}</h1>
           <div className="hero-divider"></div>
           <p className="hero-desc">Experience the soul of Tokyo street sushi with the freshest cuts and master-crafted recipes.</p>
-        </motion.div>
+        </div>
       </div>
 
       <style jsx="true">{`
@@ -155,41 +143,6 @@ const Hero = () => {
           line-height: 1.8;
           color: var(--muted-gray);
           margin-bottom: 45px;
-        }
-
-        .hero-actions {
-          display: flex;
-          gap: 20px;
-        }
-
-        .cta-btn {
-          padding: 16px 32px;
-          border-radius: 4px;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-          font-size: 0.85rem;
-          transition: var(--transition);
-        }
-
-        .cta-btn.primary {
-          background: var(--neon-red);
-          color: white;
-        }
-
-        .cta-btn.primary:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 10px 20px rgba(255, 49, 49, 0.3);
-        }
-
-        .cta-btn.secondary {
-          border: 1px solid var(--glass-border);
-          color: white;
-        }
-
-        .cta-btn.secondary:hover {
-          background: white;
-          color: black;
         }
 
         @media (max-width: 1024px) {
