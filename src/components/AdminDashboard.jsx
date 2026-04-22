@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingBag, Settings, Plus, Edit, Trash2, ArrowLeft, Image as ImageIcon, Check, Upload } from 'lucide-react';
+import { ShoppingBag, Settings, Plus, Edit, Trash2, ArrowLeft, Image as ImageIcon, Check, Upload, ClipboardList, Info } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 
@@ -29,6 +29,8 @@ const AdminDashboard = () => {
   const [heroSlides, setHeroSlides] = useState([]);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [isFetchingOrders, setIsFetchingOrders] = useState(false);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -47,6 +49,7 @@ const AdminDashboard = () => {
       fetchMenu();
       fetchCategories();
       fetchSiteSettings();
+      fetchOrders();
     }
   }, [isAuthenticated]);
 
@@ -372,11 +375,11 @@ const AdminDashboard = () => {
           <button className={`nav-btn ${activeTab === 'menu' ? 'active' : ''}`} onClick={() => setActiveTab('menu')}>
             <ShoppingBag size={20} /> Manage Menu
           </button>
+          <button className={`nav-btn ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}>
+            <ClipboardList size={20} /> Orders
+          </button>
           <button className={`nav-btn ${activeTab === 'site-settings' ? 'active' : ''}`} onClick={() => setActiveTab('site-settings')}>
             <ImageIcon size={20} /> Site Branding
-          </button>
-          <button className={`nav-btn ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
-            <Settings size={20} /> System
           </button>
         </nav>
 
@@ -392,8 +395,9 @@ const AdminDashboard = () => {
         <header className="admin-header">
           <h2>
             {activeTab === 'menu' ? 'Menu Management' : 
+             activeTab === 'orders' ? 'Orders Management' :
              activeTab === 'site-settings' ? 'Site Branding' : 
-             'System Settings'}
+             'Settings'}
           </h2>
           <div className="admin-user">
             <span className="user-role">Super Admin</span>
@@ -453,13 +457,141 @@ const AdminDashboard = () => {
             </motion.div>
           )}
 
+          {activeTab === 'orders' && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="orders-manager"
+            >
+              <div className="manager-toolbar">
+                <div className="orders-stats">
+                  <div className="stat-item">
+                    <span className="stat-label">Total Orders</span>
+                    <span className="stat-value">{orders.length}</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-label">Total Revenue</span>
+                    <span className="stat-value">₱{orders.reduce((sum, o) => sum + (o.total_price || 0), 0).toFixed(2)}</span>
+                  </div>
+                </div>
+                <button className="refresh-btn" onClick={fetchOrders} disabled={isFetchingOrders}>
+                   {isFetchingOrders ? 'Updating...' : 'Refresh Orders'}
+                </button>
+              </div>
+
+              <div className="table-container">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Order ID</th>
+                      <th>Customer</th>
+                      <th>Items</th>
+                      <th>Total</th>
+                      <th>Status</th>
+                      <th>Time</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {orders.length === 0 ? (
+                      <tr>
+                        <td colSpan="7" style={{ textAlign: 'center', padding: '40px' }}>No orders found yet.</td>
+                      </tr>
+                    ) : orders.map(order => (
+                      <tr key={order.id}>
+                        <td><span className="id-badge">#{order.id.slice(0, 8)}</span></td>
+                        <td>
+                          <div className="customer-info-cell">
+                            <strong>{order.customer_name}</strong>
+                            <span>{order.customer_phone}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="order-items-summary">
+                            {order.order_items?.map(it => (
+                              <div key={it.id} className="summary-line">
+                                {it.quantity}x {it.item_name}
+                              </div>
+                            ))}
+                          </div>
+                        </td>
+                        <td><strong>₱{(order.total_price || 0).toFixed(2)}</strong></td>
+                        <td>
+                           <select 
+                            className={`status-select ${order.status}`}
+                            value={order.status}
+                            onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                           >
+                             <option value="pending">Pending</option>
+                             <option value="confirmed">Confirmed</option>
+                             <option value="preparing">Preparing</option>
+                             <option value="completed">Completed</option>
+                             <option value="cancelled">Cancelled</option>
+                           </select>
+                        </td>
+                        <td>{new Date(order.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</td>
+                        <td>
+                          <button className="action-btn info" onClick={() => alert(`Full Order ID: ${order.id}\nCustomer: ${order.customer_name}`)}>
+                            <Info size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </motion.div>
+          )}
+
           {activeTab === 'site-settings' && (
              <motion.div 
                initial={{ opacity: 0, y: 20 }}
                animate={{ opacity: 1, y: 0 }}
                className="site-settings-container"
              >
-               <div className="settings-grid">
+                <div className="settings-grid">
+                  {/* Hero Slideshow Settings */}
+                  <div className="settings-card">
+                    <h3>Hero Slideshow (4 Images)</h3>
+                    <div className="slides-list">
+                      {heroSlides.slice(0, 4).map((slide, idx) => (
+                        <div key={slide.id} className="slide-edit-row">
+                          <div className="slide-preview">
+                            <img src={slide.image_url} alt={`Slide ${idx + 1}`} />
+                          </div>
+                          <div className="slide-input">
+                            <label>Slide {idx + 1} URL</label>
+                            <div className="input-with-action">
+                              <label className="upload-label">
+                                <input 
+                                  type="file" 
+                                  accept="image/*" 
+                                  hidden 
+                                  onChange={async (e) => {
+                                    const file = e.target.files[0];
+                                    if (file) {
+                                      const url = await handleFileUpload(file, `hero-slide-${idx+1}`);
+                                      if (url) {
+                                        const newSlides = [...heroSlides];
+                                        newSlides[idx].image_url = url;
+                                        setHeroSlides(newSlides);
+                                        // Also auto-save to DB for slides to make it snappy
+                                        handleUpdateSlide(slide.id, url);
+                                      }
+                                    }
+                                  }}
+                                />
+                                <div className={`upload-btn min-btn ${isUploading ? 'loading' : ''}`}>
+                                   <Upload size={16} />
+                                </div>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* General Settings */}
                   <form onSubmit={handleUpdateSiteSettings} className="settings-card">
                     <h3>Logo & Branding</h3>
@@ -569,48 +701,6 @@ const AdminDashboard = () => {
                       {isSavingSettings ? 'Saving...' : 'Save Branding & Contact'}
                     </button>
                   </form>
-
-                  {/* Slideshow Settings */}
-                  <div className="settings-card">
-                    <h3>Hero Slideshow (4 Images)</h3>
-                    <div className="slides-list">
-                      {heroSlides.slice(0, 4).map((slide, idx) => (
-                        <div key={slide.id} className="slide-edit-row">
-                          <div className="slide-preview">
-                            <img src={slide.image_url} alt={`Slide ${idx + 1}`} />
-                          </div>
-                          <div className="slide-input">
-                            <label>Slide {idx + 1} URL</label>
-                            <div className="input-with-action">
-                              <label className="upload-label">
-                                <input 
-                                  type="file" 
-                                  accept="image/*" 
-                                  hidden 
-                                  onChange={async (e) => {
-                                    const file = e.target.files[0];
-                                    if (file) {
-                                      const url = await handleFileUpload(file, `hero-slide-${idx+1}`);
-                                      if (url) {
-                                        const newSlides = [...heroSlides];
-                                        newSlides[idx].image_url = url;
-                                        setHeroSlides(newSlides);
-                                        // Also auto-save to DB for slides to make it snappy
-                                        handleUpdateSlide(slide.id, url);
-                                      }
-                                    }
-                                  }}
-                                />
-                                <div className={`upload-btn min-btn ${isUploading ? 'loading' : ''}`}>
-                                   <Upload size={16} />
-                                </div>
-                              </label>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
                </div>
              </motion.div>
           )}
@@ -957,6 +1047,55 @@ const AdminDashboard = () => {
           color: #ef4444;
         }
         .action-btn.delete:hover { background: #ef4444; color: white; }
+
+        .action-btn.info { background: #eff6ff; color: #3b82f6; }
+        .action-btn.info:hover { background: #3b82f6; color: white; }
+
+        /* Orders Specific Styles */
+        .orders-stats { display: flex; gap: 20px; margin-bottom: 0; }
+        .stat-item {
+          background: white;
+          padding: 15px 25px;
+          border-radius: 12px;
+          border: 1px solid #e5e7eb;
+          display: flex;
+          flex-direction: column;
+        }
+        .stat-label { font-size: 0.75rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+        .stat-value { font-size: 1.5rem; font-weight: 800; color: var(--street-black); }
+
+        .status-select {
+          padding: 6px 12px;
+          border-radius: 50px;
+          font-size: 0.8rem;
+          font-weight: 700;
+          cursor: pointer;
+          border: 1px solid transparent;
+          transition: var(--transition);
+        }
+        .status-select.pending { background: #fef3c7; color: #92400e; }
+        .status-select.confirmed { background: #dcfce7; color: #166534; }
+        .status-select.preparing { background: #dbeafe; color: #1e40af; }
+        .status-select.completed { background: #f3f4f6; color: #374151; }
+        .status-select.cancelled { background: #fee2e2; color: #991b1b; }
+
+        .customer-info-cell { display: flex; flex-direction: column; }
+        .customer-info-cell span { font-size: 0.8rem; color: #9ca3af; }
+        
+        .order-items-summary { font-size: 0.85rem; line-height: 1.4; color: #4b5563; }
+        .id-badge { font-family: monospace; padding: 4px 8px; background: #f8fafc; border-radius: 4px; border: 1px solid #e2e8f0; font-size: 0.8rem; }
+
+        .refresh-btn { 
+          padding: 8px 16px; 
+          border-radius: 8px; 
+          background: white; 
+          border: 1px solid #e5e7eb; 
+          color: #4b5563; 
+          font-weight: 600; 
+          font-size: 0.85rem;
+          cursor: pointer;
+        }
+        .refresh-btn:hover { background: #f9fafb; border-color: #d1d5db; }
 
         .settings-card {
           background: white;
