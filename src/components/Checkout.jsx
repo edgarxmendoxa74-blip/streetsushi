@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Phone, ShoppingBag, CheckCircle, CreditCard } from 'lucide-react';
+import { ArrowLeft, User, Phone, ShoppingBag, CheckCircle, CreditCard, Copy } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { supabase } from '../lib/supabase';
 
@@ -11,6 +11,8 @@ const Checkout = () => {
   const [customerDetails, setCustomerDetails] = useState({ name: '', phone: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
+  const [placedOrderItems, setPlacedOrderItems] = useState([]);
+  const [isCopied, setIsCopied] = useState(false);
 
   // If cart is empty and not in success state, redirect back to menu
   React.useEffect(() => {
@@ -19,11 +21,23 @@ const Checkout = () => {
     }
   }, [cart, orderSuccess, navigate]);
 
+  const handleCopy = () => {
+    const itemsText = placedOrderItems.map(item => `${item.quantity}x ${item.name} - $${(item.price * item.quantity).toFixed(2)}`).join('\n');
+    const fullText = `🍣 Street Sushi Order\n------------------\nCustomer: ${customerDetails.name}\nPhone: ${customerDetails.phone || 'N/A'}\n\nItems:\n${itemsText}\n------------------\nTotal: $${cartTotal.toFixed(2)}\n\nThank you!`;
+    
+    navigator.clipboard.writeText(fullText);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!customerDetails.name) return;
     
     setIsSubmitting(true);
+    // Capture cart items for the summary/copy before clearing
+    setPlacedOrderItems([...cart]);
+
     try {
       // 1. Insert order
       const { data: order, error: orderError } = await supabase
@@ -76,6 +90,32 @@ const Checkout = () => {
           </div>
           <h1>Order Confirmed!</h1>
           <p>Thank you for your order. We are preparing your fresh sushi now.</p>
+          
+          <div className="order-summary-copy">
+            <div className="summary-header">
+              <h3>Order Detail Summary</h3>
+              <button className={`copy-details-btn ${isCopied ? 'copied' : ''}`} onClick={handleCopy}>
+                {isCopied ? 'Copied!' : (
+                  <>
+                    <Copy size={16} /> Copy Details
+                  </>
+                )}
+              </button>
+            </div>
+            <div className="summary-mini-list">
+              {placedOrderItems.map(item => (
+                <div key={item.id} className="mini-item">
+                  <span>{item.quantity}x {item.name}</span>
+                  <span>${(item.price * item.quantity).toFixed(2)}</span>
+                </div>
+              ))}
+              <div className="mini-total">
+                <span>Total Amount:</span>
+                <span>${cartTotal.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+
           <div className="order-next-steps">
             <h3>What's Next?</h3>
             <ul>
@@ -121,6 +161,66 @@ const Checkout = () => {
             color: var(--muted-gray);
             font-size: 1.1rem;
             margin-bottom: 40px;
+          }
+          .order-summary-copy {
+            background: #f8fafc;
+            padding: 30px;
+            border-radius: 24px;
+            margin-bottom: 30px;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+          }
+          .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+          }
+          .summary-header h3 {
+            font-size: 1.1rem;
+            color: var(--street-black);
+          }
+          .copy-details-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--street-orange);
+            border: 1px solid var(--street-orange);
+            transition: var(--transition);
+          }
+          .copy-details-btn:hover {
+            background: var(--street-orange);
+            color: white;
+          }
+          .copy-details-btn.copied {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+          }
+          .summary-mini-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+          }
+          .mini-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            color: var(--muted-gray);
+          }
+          .mini-total {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #cbd5e1;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 800;
+            color: var(--street-black);
           }
           .order-next-steps {
             background: #f8fafc;
