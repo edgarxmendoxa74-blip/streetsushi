@@ -464,100 +464,101 @@ const AdminDashboard = () => {
                   <form onSubmit={handleUpdateSiteSettings} className="settings-card">
                     <h3>Logo & Branding</h3>
                     <div className="settings-form-grid">
-                    <div className="form-group">
-                      <label>Site Logo</label>
-                      <div className="input-with-upload">
-                        <div className="logo-upload-control">
-                          {siteSettings.logo_url && (
-                             <div className="logo-preview-box">
-                               <img src={siteSettings.logo_url} alt="Site Logo" />
-                             </div>
-                          )}
-                          <span className="current-url-display">{siteSettings.logo_url || 'No logo set'}</span>
-                        </div>
-                        <label className="upload-label">
-                          <input 
-                            type="file" 
-                            accept="image/*" 
-                            hidden 
-                            onChange={async (e) => {
-                              const file = e.target.files[0];
-                              if (file) {
-                                const url = await handleFileUpload(file, 'logo');
-                                if (url) setSiteSettings({...siteSettings, logo_url: url});
-                              }
-                            }}
-                          />
-                          <div className={`upload-btn ${isUploading ? 'loading' : ''}`}>
-                             <Upload size={16} />
+                      <div className="form-group">
+                        <label>Site Logo</label>
+                        <div className="input-with-upload">
+                          <div className="logo-upload-control">
+                            {siteSettings.logo_url && (
+                               <div className="logo-preview-box">
+                                 <img src={siteSettings.logo_url} alt="Site Logo" />
+                               </div>
+                            )}
+                            <span className="current-url-display truncate">{siteSettings.logo_url || 'No logo set'}</span>
                           </div>
-                        </label>
+                          <label className="upload-label">
+                            <input 
+                              type="file" 
+                              accept="image/*" 
+                              hidden 
+                              onChange={async (e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                  const url = await handleFileUpload(file, 'logo');
+                                  if (url) setSiteSettings({...siteSettings, logo_url: url});
+                                }
+                              }}
+                            />
+                            <div className={`upload-btn ${isUploading ? 'loading' : ''}`}>
+                               <Upload size={16} />
+                            </div>
+                          </label>
+                        </div>
+                      </div>
+                      <div className="form-group">
+                        <label>Hero Title</label>
+                        <input 
+                          type="text" 
+                          value={siteSettings.hero_title} 
+                          onChange={e => setSiteSettings({...siteSettings, hero_title: e.target.value})}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>Hero Subtitle</label>
+                        <input 
+                          type="text" 
+                          value={siteSettings.hero_subtitle} 
+                          onChange={e => setSiteSettings({...siteSettings, hero_subtitle: e.target.value})}
+                        />
                       </div>
                     </div>
-                    <div className="form-group">
-                      <label>Hero Title</label>
-                      <input 
-                        type="text" 
-                        value={siteSettings.hero_title} 
-                        onChange={e => setSiteSettings({...siteSettings, hero_title: e.target.value})}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Hero Subtitle</label>
-                      <input 
-                        type="text" 
-                        value={siteSettings.hero_subtitle} 
-                        onChange={e => setSiteSettings({...siteSettings, hero_subtitle: e.target.value})}
-                      />
-                     </div>
 
                     <div className="contact-divider">Contact & Socials</div>
                     
                     <div className="settings-form-grid">
                       <div className="form-group">
-                      <label>Facebook URL</label>
-                      <input 
-                        type="text" 
-                        placeholder="https://facebook.com/..."
-                        value={siteSettings.fb_url || ''} 
-                        onChange={e => setSiteSettings({...siteSettings, fb_url: e.target.value})}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Instagram URL</label>
-                      <input 
-                        type="text" 
-                        placeholder="https://instagram.com/..."
-                        value={siteSettings.ig_url || ''} 
-                        onChange={e => setSiteSettings({...siteSettings, ig_url: e.target.value})}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>TikTok URL</label>
-                      <input 
-                        type="text" 
-                        placeholder="https://tiktok.com/@..."
-                        value={siteSettings.tiktok_url || ''} 
-                        onChange={e => setSiteSettings({...siteSettings, tiktok_url: e.target.value})}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Contact Number</label>
-                      <input 
-                        type="text" 
-                        placeholder="+63 9XX XXX XXXX"
-                        value={siteSettings.contact_number || ''} 
-                        onChange={e => setSiteSettings({...siteSettings, contact_number: e.target.value})}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Location / Address</label>
-                      <input 
-                        type="text" 
-                        placeholder="123 Street, City"
-                        value={siteSettings.location || ''} 
-                        onChange={e => setSiteSettings({...siteSettings, location: e.target.value})}
-                      />
+                        <label>Facebook URL</label>
+                        <input 
+                          type="text" 
+                          placeholder="https://facebook.com/..."
+                          value={siteSettings.fb_url || ''} 
+                          onChange={e => setSiteSettings({...siteSettings, fb_url: e.target.value})}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>Instagram URL</label>
+                        <input 
+                          type="text" 
+                          placeholder="https://instagram.com/..."
+                          value={siteSettings.ig_url || ''} 
+                          onChange={e => setSiteSettings({...siteSettings, ig_url: e.target.value})}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>TikTok URL</label>
+                        <input 
+                          type="text" 
+                          placeholder="https://tiktok.com/@..."
+                          value={siteSettings.tiktok_url || ''} 
+                          onChange={e => setSiteSettings({...siteSettings, tiktok_url: e.target.value})}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>Contact Number</label>
+                        <input 
+                          type="text" 
+                          placeholder="+63 9XX XXX XXXX"
+                          value={siteSettings.contact_number || ''} 
+                          onChange={e => setSiteSettings({...siteSettings, contact_number: e.target.value})}
+                        />
+                      </div>
+                      <div className="form-group full-width">
+                        <label>Location / Address</label>
+                        <input 
+                          type="text" 
+                          placeholder="123 Street, City"
+                          value={siteSettings.location || ''} 
+                          onChange={e => setSiteSettings({...siteSettings, location: e.target.value})}
+                        />
                       </div>
                     </div>
 
