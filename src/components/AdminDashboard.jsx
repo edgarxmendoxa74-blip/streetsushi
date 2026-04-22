@@ -463,6 +463,7 @@ const AdminDashboard = () => {
                   {/* General Settings */}
                   <form onSubmit={handleUpdateSiteSettings} className="settings-card">
                     <h3>Logo & Branding</h3>
+                    <div className="settings-form-grid">
                     <div className="form-group">
                       <label>Site Logo</label>
                       <div className="input-with-upload">
@@ -508,11 +509,12 @@ const AdminDashboard = () => {
                         value={siteSettings.hero_subtitle} 
                         onChange={e => setSiteSettings({...siteSettings, hero_subtitle: e.target.value})}
                       />
-                    </div>
+                     </div>
 
                     <div className="contact-divider">Contact & Socials</div>
                     
-                    <div className="form-group">
+                    <div className="settings-form-grid">
+                      <div className="form-group">
                       <label>Facebook URL</label>
                       <input 
                         type="text" 
@@ -556,6 +558,7 @@ const AdminDashboard = () => {
                         value={siteSettings.location || ''} 
                         onChange={e => setSiteSettings({...siteSettings, location: e.target.value})}
                       />
+                      </div>
                     </div>
 
                     <button type="submit" className="save-settings-btn" disabled={isSavingSettings}>
@@ -1030,9 +1033,18 @@ const AdminDashboard = () => {
 
         .modal-actions { display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px; }
 
+        .settings-form-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 20px;
+          margin-bottom: 20px;
+        }
+        .form-group.full-width {
+          grid-column: 1 / -1;
+        }
         .logo-preview-box, .slide-preview {
-          width: 80px;
-          height: 80px;
+          width: 60px;
+          height: 60px;
           border-radius: 12px;
           overflow: hidden;
           border: 1px solid #e5e7eb;
