@@ -370,10 +370,6 @@ const Checkout = () => {
                   <span>Subtotal</span>
                   <span>${cartTotal.toFixed(2)}</span>
                 </div>
-                <div className="footer-row">
-                  <span>Pickup Fee</span>
-                  <span className="free">FREE</span>
-                </div>
                 <div className="total-row">
                   <span>Total Amount</span>
                   <span>${cartTotal.toFixed(2)}</span>
