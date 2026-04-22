@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Phone, MessageCircle, Send, Facebook, Instagram, Music2, Globe, Clock, ExternalLink } from 'lucide-react';
+import { MapPin, Phone, MessageCircle, Send, Globe, Clock, ExternalLink } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const Contact = () => {
@@ -88,17 +88,17 @@ const Contact = () => {
               <div className="social-links">
                 {contactInfo?.fb_url && (
                   <a href={contactInfo.fb_url} target="_blank" rel="noopener noreferrer" className="social-link fb">
-                    <Facebook size={20} />
+                    <MessageCircle size={20} />
                   </a>
                 )}
                 {contactInfo?.ig_url && (
                   <a href={contactInfo.ig_url} target="_blank" rel="noopener noreferrer" className="social-link ig">
-                    <Instagram size={20} />
+                    <Globe size={20} />
                   </a>
                 )}
                 {contactInfo?.tiktok_url && (
                   <a href={contactInfo.tiktok_url} target="_blank" rel="noopener noreferrer" className="social-link tt">
-                    <Music2 size={20} />
+                    <Globe size={20} />
                   </a>
                 )}
               </div>
