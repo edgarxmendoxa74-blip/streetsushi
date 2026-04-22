@@ -435,7 +435,7 @@ const AdminDashboard = () => {
                           <span>{item.name}</span>
                         </td>
                         <td>{item.category}</td>
-                        <td>${item.price.toFixed(2)}</td>
+                        <td>₱{item.price.toFixed(2)}</td>
                         <td>
                           {item.is_featured ? <span className="status-badge featured">Featured</span> : <span className="status-badge active">Active</span>}
                         </td>

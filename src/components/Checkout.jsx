@@ -24,11 +24,11 @@ const Checkout = () => {
   const handleCopy = (e) => {
     if (e) e.preventDefault();
     const items = orderSuccess ? placedOrderItems : cart;
-    const itemsText = items.map(item => `${item.quantity}x ${item.name} - $${(item.price * item.quantity).toFixed(2)}`).join('\n');
+    const itemsText = items.map(item => `${item.quantity}x ${item.name} - ₱${(item.price * item.quantity).toFixed(2)}`).join('\n');
     const name = orderSuccess ? customerDetails.name : (customerDetails.name || 'Guest');
     const phone = customerDetails.phone || 'N/A';
     
-    const fullText = `🍣 Street Sushi Order\n------------------\nCustomer: ${name}\nPhone: ${phone}\n\nItems:\n${itemsText}\n------------------\nTotal: $${cartTotal.toFixed(2)}\n\nThank you!`;
+    const fullText = `🍣 Street Sushi Order\n------------------\nCustomer: ${name}\nPhone: ${phone}\n\nItems:\n${itemsText}\n------------------\nTotal: ₱${cartTotal.toFixed(2)}\n\nThank you!`;
     
     navigator.clipboard.writeText(fullText);
     setIsCopied(true);
@@ -169,9 +169,9 @@ Customer: ${customerDetails.name || '...'}
 Phone: ${customerDetails.phone || 'N/A'}
 
 Items:
-${cart.map(item => `${item.quantity}x ${item.name} - $${(item.price * item.quantity).toFixed(2)}`).join('\n')}
+${cart.map(item => `${item.quantity}x ${item.name} - ₱${(item.price * item.quantity).toFixed(2)}`).join('\n')}
 ------------------
-Total: $${cartTotal.toFixed(2)}`}
+Total: ₱${cartTotal.toFixed(2)}`}
                     </pre>
                   </div>
                   <button 
@@ -208,7 +208,7 @@ Total: $${cartTotal.toFixed(2)}`}
                     </div>
                     <div className="item-info">
                       <h4>{item.name}</h4>
-                      <span className="item-total">${(item.price * item.quantity).toFixed(2)}</span>
+                      <span className="item-total">₱{(item.price * item.quantity).toFixed(1)}</span>
                     </div>
                   </div>
                 ))}
@@ -217,11 +217,11 @@ Total: $${cartTotal.toFixed(2)}`}
               <div className="summary-footer">
                 <div className="footer-row">
                   <span>Subtotal</span>
-                  <span>${cartTotal.toFixed(2)}</span>
+                  <span>₱{cartTotal.toFixed(2)}</span>
                 </div>
                 <div className="total-row">
                   <span>Total Amount</span>
-                  <span>${cartTotal.toFixed(2)}</span>
+                  <span>₱{cartTotal.toFixed(2)}</span>
                 </div>
               </div>
             </div>

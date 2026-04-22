@@ -89,7 +89,7 @@ const Navbar = () => {
                                 <div className="item-details">
                                   <h4>{item.name}</h4>
                                   <div className="item-meta">
-                                    <span className="item-price">${(item.price * item.quantity).toFixed(2)}</span>
+                                    <span className="item-price">₱{(item.price * item.quantity).toFixed(2)}</span>
                                     <div className="quantity-controls">
                                       <button onClick={() => updateQuantity(item.id, item.quantity - 1)}>
                                         <Minus size={14} />
@@ -112,11 +112,11 @@ const Navbar = () => {
                             <div className="cart-summary">
                               <div className="summary-row">
                                 <span>Subtotal</span>
-                                <span>${cartTotal.toFixed(2)}</span>
+                                <span>₱{cartTotal.toFixed(2)}</span>
                               </div>
                               <div className="summary-row total">
                                 <span>Estimated Total</span>
-                                <span>${cartTotal.toFixed(2)}</span>
+                                <span>₱{cartTotal.toFixed(2)}</span>
                               </div>
                             </div>
                             <button className="checkout-btn" onClick={() => {

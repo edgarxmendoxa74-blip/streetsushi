@@ -137,7 +137,7 @@ const Menu = () => {
             <div className="card-info">
               <div className="card-header">
                 <h3>{item.name}</h3>
-                <span className="price">${item.price.toFixed(2)}</span>
+                <span className="price">₱{item.price.toFixed(2)}</span>
               </div>
               <p>{item.description}</p>
               <button className="details-btn" onClick={() => addToCart(item)}>
@@ -179,7 +179,7 @@ const Menu = () => {
                 </div>
                 
                 <div className="modal-footer">
-                  <span className="modal-price">${selectedItem.price.toFixed(2)}</span>
+                  <span className="modal-price">₱{selectedItem.price.toFixed(2)}</span>
                   <button className="add-to-cart-modal" onClick={() => {
                     addToCart(selectedItem);
                     setSelectedItem(null);
