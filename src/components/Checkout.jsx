@@ -21,7 +21,8 @@ const Checkout = () => {
     }
   }, [cart, orderSuccess, navigate]);
 
-  const handleCopy = () => {
+  const handleCopy = (e) => {
+    if (e) e.preventDefault();
     const items = orderSuccess ? placedOrderItems : cart;
     const itemsText = items.map(item => `${item.quantity}x ${item.name} - $${(item.price * item.quantity).toFixed(2)}`).join('\n');
     const name = orderSuccess ? customerDetails.name : (customerDetails.name || 'Guest');
@@ -367,12 +368,26 @@ const Checkout = () => {
                 </div>
                 <div className="payment-options">
                   <div className="payment-card active">
-                    <CreditCard size={24} />
-                    <div>
-                      <label>Walk-in Only</label>
-                      <span>Cash or Digital Pay at the counter</span>
+                    <div className="payment-card-content">
+                      <CreditCard size={24} />
+                      <div>
+                        <label>Walk-in Only</label>
+                        <span>Cash or Digital Pay at the counter</span>
+                      </div>
+                      <div className="check">✓</div>
                     </div>
-                    <div className="check">✓</div>
+                    
+                    <button 
+                      type="button"
+                      className={`copy-walkin-btn ${isCopied ? 'copied' : ''}`}
+                      onClick={handleCopy}
+                    >
+                      {isCopied ? 'Copied Details!' : (
+                        <>
+                          <Copy size={14} /> Copy Order for Walk-in
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -391,13 +406,6 @@ const Checkout = () => {
             <div className="summary-card glass">
               <div className="summary-card-header">
                 <h3>Order Summary</h3>
-                <button 
-                  className={`copy-summary-btn ${isCopied ? 'copied' : ''}`}
-                  onClick={handleCopy}
-                  title="Copy details to clipboard"
-                >
-                  {isCopied ? 'Copied!' : <Copy size={16} />}
-                </button>
               </div>
               <div className="summary-list">
                 {cart.map(item => (
@@ -569,30 +577,34 @@ const Checkout = () => {
         }
 
         .payment-card {
+          padding: 20px;
+          border: 2px solid var(--street-orange);
+          border-radius: 24px;
+          background: rgba(255, 107, 0, 0.02);
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+          position: relative;
+        }
+        .payment-card-content {
           display: flex;
           align-items: center;
           gap: 20px;
-          padding: 20px;
-          border: 2px solid var(--street-orange);
-          border-radius: 20px;
-          background: rgba(255, 107, 0, 0.02);
-          position: relative;
+          flex: 1;
         }
-
         .payment-card label {
           display: block;
           font-weight: 700;
           color: var(--street-black);
         }
-
         .payment-card span {
           font-size: 0.85rem;
           color: var(--muted-gray);
         }
-
         .payment-card .check {
           position: absolute;
           right: 20px;
+          top: 30px;
           width: 24px;
           height: 24px;
           background: var(--street-orange);
@@ -602,6 +614,30 @@ const Checkout = () => {
           align-items: center;
           justify-content: center;
           font-size: 0.8rem;
+        }
+        .copy-walkin-btn {
+          width: 100%;
+          background: white;
+          color: var(--street-orange);
+          border: 1px solid var(--street-orange);
+          padding: 10px;
+          border-radius: 12px;
+          font-size: 0.8rem;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          transition: var(--transition);
+        }
+        .copy-walkin-btn:hover {
+          background: var(--street-orange);
+          color: white;
+        }
+        .copy-walkin-btn.copied {
+          background: #10b981;
+          color: white;
+          border-color: #10b981;
         }
 
         .submit-order-btn {
