@@ -9,7 +9,6 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [logo, setLogo] = useState('/logo.png');
   const [contactInfo, setContactInfo] = useState(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const { cart, cartCount, cartTotal, removeFromCart, updateQuantity, isCartOpen, setIsCartOpen, toggleCart, clearCart } = useCart();
 
@@ -34,61 +33,11 @@ const Navbar = () => {
         <div className="nav-actions">
           <div className="contact-wrapper">
             <button 
-              className={`order-btn ${isDropdownOpen ? 'active' : ''}`}
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="order-btn"
+              onClick={() => navigate('/contact')}
             >
               Contact
             </button>
-
-            {isDropdownOpen && (
-              <div className="contact-dropdown glass">
-                <div className="dropdown-header">Visit Us & Connect</div>
-                
-                <div className="social-links-grid">
-                  {contactInfo?.fb_url && (
-                    <a href={contactInfo.fb_url} target="_blank" rel="noopener noreferrer" className="social-item">
-                      <FacebookIcon size={18} />
-                      <span>Facebook</span>
-                    </a>
-                  )}
-                  {contactInfo?.ig_url && (
-                    <a href={contactInfo.ig_url} target="_blank" rel="noopener noreferrer" className="social-item">
-                      <InstagramIcon size={18} />
-                      <span>Instagram</span>
-                    </a>
-                  )}
-                  {contactInfo?.tiktok_url && (
-                    <a href={contactInfo.tiktok_url} target="_blank" rel="noopener noreferrer" className="social-item">
-                      <TikTokIcon size={18} />
-                      <span>TikTok</span>
-                    </a>
-                  )}
-                </div>
-
-                <div className="dropdown-divider"></div>
-
-                <div className="contact-details">
-                  {contactInfo?.contact_number && (
-                    <a href={`tel:${contactInfo.contact_number}`} className="detail-item">
-                      <Phone size={16} />
-                      <div>
-                        <label>Call Us</label>
-                        <span>{contactInfo.contact_number}</span>
-                      </div>
-                    </a>
-                  )}
-                  {contactInfo?.location && (
-                    <div className="detail-item">
-                      <MapPin size={16} />
-                      <div>
-                        <label>Location</label>
-                        <span>{contactInfo.location}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
 
           <div className="cart-wrapper">

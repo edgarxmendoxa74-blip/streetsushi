@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Menu from './components/Menu';
 import Checkout from './components/Checkout';
+import Contact from './components/Contact';
 import AdminDashboard from './components/AdminDashboard';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
             </div>
           } />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </BrowserRouter>
