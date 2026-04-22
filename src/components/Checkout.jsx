@@ -70,6 +70,10 @@ const Checkout = () => {
 
       setOrderSuccess(true);
       clearCart();
+      // Redirect to Facebook after a short delay so they see the success message
+      setTimeout(() => {
+        window.open('https://www.facebook.com/profile.php?id=61564958380863&sk=about', '_blank');
+      }, 1500);
     } catch (err) {
       alert('Error processing order: ' + err.message);
     } finally {
@@ -124,9 +128,19 @@ const Checkout = () => {
               <li>Complete payment and enjoy your meal!</li>
             </ul>
           </div>
-          <button className="return-btn" onClick={() => navigate('/')}>
-            Back to Home
-          </button>
+          <div className="success-actions">
+            <button className="return-btn" onClick={() => navigate('/')}>
+              Back to Home
+            </button>
+            <a 
+              href="https://www.facebook.com/profile.php?id=61564958380863&sk=about" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="fb-follow-btn"
+            >
+              Visit Our Facebook
+            </a>
+          </div>
         </motion.div>
         
         <style jsx="true">{`
@@ -250,10 +264,16 @@ const Checkout = () => {
             color: var(--street-orange);
             font-weight: bold;
           }
+          .success-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+          }
           .return-btn {
             background: var(--street-orange);
             color: white;
-            padding: 15px 50px;
+            padding: 15px 40px;
             border-radius: 50px;
             font-weight: 700;
             text-transform: uppercase;
@@ -263,6 +283,22 @@ const Checkout = () => {
           .return-btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 10px 20px rgba(255, 107, 0, 0.2);
+          }
+          .fb-follow-btn {
+            background: #1877f2;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: var(--transition);
+            display: inline-block;
+          }
+          .fb-follow-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(24, 119, 242, 0.2);
+            opacity: 0.9;
           }
         `}</style>
       </div>
