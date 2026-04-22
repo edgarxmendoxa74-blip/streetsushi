@@ -19,7 +19,7 @@ const Hero = () => {
         });
       }
 
-      const { data: slidesData } = await supabase.from('hero_slides').select('image_url').order('order_index', { ascending: true });
+      const { data: slidesData } = await supabase.from('hero_slides').select('image_url').order('order_index', { ascending: true }).limit(4);
       if (slidesData && slidesData.length > 0) {
         setSlides(slidesData.map(s => s.image_url));
       }

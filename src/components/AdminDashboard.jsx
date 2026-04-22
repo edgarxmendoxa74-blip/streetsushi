@@ -468,13 +468,16 @@ const AdminDashboard = () => {
                         <label>Site Logo</label>
                         <div className="input-with-upload">
                           <div className="logo-upload-control">
-                            {siteSettings.logo_url && (
-                               <div className="logo-preview-box">
-                                 <img src={siteSettings.logo_url} alt="Site Logo" />
-                               </div>
-                            )}
-                            <span className="current-url-display truncate">{siteSettings.logo_url || 'No logo set'}</span>
-                          </div>
+                            {siteSettings.logo_url ? (
+                             <div className="logo-preview-box">
+                               <img src={siteSettings.logo_url} alt="Site Logo" />
+                             </div>
+                          ) : (
+                             <div className="logo-preview-box empty">
+                               <ImageIcon size={20} />
+                             </div>
+                          )}
+                        </div>
                           <label className="upload-label">
                             <input 
                               type="file" 
@@ -571,7 +574,7 @@ const AdminDashboard = () => {
                   <div className="settings-card">
                     <h3>Hero Slideshow (4 Images)</h3>
                     <div className="slides-list">
-                      {heroSlides.map((slide, idx) => (
+                      {heroSlides.slice(0, 4).map((slide, idx) => (
                         <div key={slide.id} className="slide-edit-row">
                           <div className="slide-preview">
                             <img src={slide.image_url} alt={`Slide ${idx + 1}`} />
@@ -579,9 +582,6 @@ const AdminDashboard = () => {
                           <div className="slide-input">
                             <label>Slide {idx + 1} URL</label>
                             <div className="input-with-action">
-                              <div className="current-url-display truncate">
-                                {slide.image_url.split('/').pop()}
-                              </div>
                               <label className="upload-label">
                                 <input 
                                   type="file" 
