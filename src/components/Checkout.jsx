@@ -22,8 +22,12 @@ const Checkout = () => {
   }, [cart, orderSuccess, navigate]);
 
   const handleCopy = () => {
-    const itemsText = placedOrderItems.map(item => `${item.quantity}x ${item.name} - $${(item.price * item.quantity).toFixed(2)}`).join('\n');
-    const fullText = `🍣 Street Sushi Order\n------------------\nCustomer: ${customerDetails.name}\nPhone: ${customerDetails.phone || 'N/A'}\n\nItems:\n${itemsText}\n------------------\nTotal: $${cartTotal.toFixed(2)}\n\nThank you!`;
+    const items = orderSuccess ? placedOrderItems : cart;
+    const itemsText = items.map(item => `${item.quantity}x ${item.name} - $${(item.price * item.quantity).toFixed(2)}`).join('\n');
+    const name = orderSuccess ? customerDetails.name : (customerDetails.name || 'Guest');
+    const phone = customerDetails.phone || 'N/A';
+    
+    const fullText = `🍣 Street Sushi Order\n------------------\nCustomer: ${name}\nPhone: ${phone}\n\nItems:\n${itemsText}\n------------------\nTotal: $${cartTotal.toFixed(2)}\n\nThank you!`;
     
     navigator.clipboard.writeText(fullText);
     setIsCopied(true);
@@ -385,7 +389,16 @@ const Checkout = () => {
 
           <aside className="checkout-summary">
             <div className="summary-card glass">
-              <h3>Order Summary</h3>
+              <div className="summary-card-header">
+                <h3>Order Summary</h3>
+                <button 
+                  className={`copy-summary-btn ${isCopied ? 'copied' : ''}`}
+                  onClick={handleCopy}
+                  title="Copy details to clipboard"
+                >
+                  {isCopied ? 'Copied!' : <Copy size={16} />}
+                </button>
+              </div>
               <div className="summary-list">
                 {cart.map(item => (
                   <div key={item.id} className="summary-item">
@@ -626,9 +639,38 @@ const Checkout = () => {
           box-shadow: var(--shadow-md);
         }
 
+        .summary-card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 30px;
+        }
+        .copy-summary-btn {
+          background: #f1f5f9;
+          color: var(--muted-gray);
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: var(--transition);
+          font-size: 0.7rem;
+          font-weight: 700;
+        }
+        .copy-summary-btn:hover {
+          background: var(--street-orange);
+          color: white;
+        }
+        .copy-summary-btn.copied {
+          width: auto;
+          padding: 0 12px;
+          background: #10b981;
+          color: white;
+        }
         .summary-card h3 {
           font-size: 1.5rem;
-          margin-bottom: 30px;
+          margin-bottom: 0px;
           color: var(--street-black);
           font-family: var(--font-brush);
         }
