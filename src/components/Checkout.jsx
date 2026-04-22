@@ -376,18 +376,6 @@ const Checkout = () => {
                       </div>
                       <div className="check">✓</div>
                     </div>
-                    
-                    <button 
-                      type="button"
-                      className={`copy-walkin-btn ${isCopied ? 'copied' : ''}`}
-                      onClick={handleCopy}
-                    >
-                      {isCopied ? 'Copied Details!' : (
-                        <>
-                          <Copy size={14} /> Copy Order for Walk-in
-                        </>
-                      )}
-                    </button>
                   </div>
                 </div>
 
