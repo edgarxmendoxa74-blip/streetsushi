@@ -390,6 +390,34 @@ const Checkout = () => {
                     </button>
                   </div>
                 </div>
+
+                {/* Visible Copy Preview */}
+                <div className="order-copy-preview glass">
+                  <div className="preview-header">
+                    <h4>Visible Order Details</h4>
+                    <span className="preview-hint">What your clipboard will contain</span>
+                  </div>
+                  <div className="preview-box">
+                    <pre>
+{`🍣 Street Sushi Order
+------------------
+Customer: ${customerDetails.name || '...'}
+Phone: ${customerDetails.phone || 'N/A'}
+
+Items:
+${cart.map(item => `${item.quantity}x ${item.name} - $${(item.price * item.quantity).toFixed(2)}`).join('\n')}
+------------------
+Total: $${cartTotal.toFixed(2)}`}
+                    </pre>
+                  </div>
+                  <button 
+                    type="button"
+                    className={`main-copy-btn ${isCopied ? 'copied' : ''}`}
+                    onClick={handleCopy}
+                  >
+                    {isCopied ? 'Details Copied!' : 'Copy Formatted Details'}
+                  </button>
+                </div>
               </div>
 
               <button 
@@ -640,6 +668,62 @@ const Checkout = () => {
           border-color: #10b981;
         }
 
+        .order-copy-preview {
+          margin-top: 30px;
+          padding: 30px;
+          border-radius: 24px;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+        }
+        .preview-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+        }
+        .preview-header h4 {
+          font-size: 1rem;
+          color: var(--street-black);
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+        .preview-hint {
+          font-size: 0.75rem;
+          color: var(--muted-gray);
+          font-style: italic;
+        }
+        .preview-box {
+          background: white;
+          padding: 20px;
+          border-radius: 16px;
+          border: 1px solid #e2e8f0;
+          margin-bottom: 20px;
+        }
+        .preview-box pre {
+          white-space: pre-wrap;
+          font-family: 'Courier New', Courier, monospace;
+          font-size: 0.9rem;
+          color: #334155;
+          line-height: 1.5;
+        }
+        .main-copy-btn {
+          width: 100%;
+          background: var(--street-black);
+          color: white;
+          padding: 15px;
+          border-radius: 12px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          transition: var(--transition);
+        }
+        .main-copy-btn:hover {
+          background: var(--street-orange);
+          transform: translateY(-2px);
+        }
+        .main-copy-btn.copied {
+          background: #10b981;
+        }
         .submit-order-btn {
           width: 100%;
           background: var(--street-orange);
