@@ -467,6 +467,11 @@ const AdminDashboard = () => {
                       <label>Site Logo</label>
                       <div className="input-with-upload">
                         <div className="logo-upload-control">
+                          {siteSettings.logo_url && (
+                             <div className="logo-preview-box">
+                               <img src={siteSettings.logo_url} alt="Site Logo" />
+                             </div>
+                          )}
                           <span className="current-url-display">{siteSettings.logo_url || 'No logo set'}</span>
                         </div>
                         <label className="upload-label">
@@ -1024,6 +1029,26 @@ const AdminDashboard = () => {
         .checkbox-group input { width: 18px; height: 18px; accent-color: var(--street-orange); }
 
         .modal-actions { display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px; }
+
+        .logo-preview-box, .slide-preview {
+          width: 80px;
+          height: 80px;
+          border-radius: 12px;
+          overflow: hidden;
+          border: 1px solid #e5e7eb;
+          background: #f9fafb;
+          flex-shrink: 0;
+        }
+        .logo-preview-box img, .slide-preview img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .logo-upload-control {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+        }
 
         @keyframes pulse {
           0% { opacity: 0.5; }
