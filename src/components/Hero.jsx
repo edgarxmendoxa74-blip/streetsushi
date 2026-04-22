@@ -68,7 +68,7 @@ const Hero = () => {
           display: flex;
           height: 100vh;
           width: 100%;
-          background: #050505;
+          background: var(--bg-light);
           overflow: hidden;
         }
 
@@ -94,7 +94,7 @@ const Hero = () => {
           left: 0;
           width: 100%;
           height: 100%;
-          background: linear-gradient(90deg, transparent 60%, rgba(5,5,5,1) 100%);
+          background: linear-gradient(90deg, transparent 60%, var(--bg-light) 100%);
           z-index: 2;
         }
 
@@ -105,7 +105,22 @@ const Hero = () => {
           align-items: center;
           padding: 0 5%;
           z-index: 3;
-          background: #050505;
+          background: var(--bg-light);
+          position: relative;
+        }
+
+        .hero-right::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          opacity: 0.5;
+          background-image: radial-gradient(circle at 100% 150%, var(--bg-light) 24%, var(--wave-color) 25%, var(--wave-color) 28%, var(--bg-light) 29%, var(--bg-light) 36%, var(--wave-color) 36%, var(--wave-color) 40%, transparent 40%),
+            radial-gradient(circle at 0 150%, var(--bg-light) 24%, var(--wave-color) 25%, var(--wave-color) 28%, var(--bg-light) 29%, var(--bg-light) 36%, var(--wave-color) 36%, var(--wave-color) 40%, transparent 40%);
+          background-size: 60px 30px;
+          z-index: -1;
         }
 
         .hero-text-content {
@@ -113,7 +128,7 @@ const Hero = () => {
         }
 
         .subtitle-brand {
-          color: var(--neon-red);
+          color: var(--street-orange);
           text-transform: uppercase;
           font-weight: 800;
           letter-spacing: 5px;
@@ -124,17 +139,18 @@ const Hero = () => {
 
         .hero-title {
           font-size: 4.5rem;
-          line-height: 1;
+          line-height: 1.1;
           margin-bottom: 30px;
-          font-family: 'Anton', sans-serif;
-          text-transform: uppercase;
-          letter-spacing: 2px;
+          font-family: var(--font-brush);
+          color: var(--street-black);
+          text-transform: none;
+          letter-spacing: 0;
         }
 
         .hero-divider {
           width: 60px;
           height: 4px;
-          background: var(--neon-red);
+          background: var(--street-orange);
           margin-bottom: 35px;
         }
 
@@ -166,10 +182,10 @@ const Hero = () => {
              align-items: center;
           }
           .hero-title {
-            font-size: 3rem;
+            font-size: 3.5rem;
           }
           .hero-overlay-gradient {
-            background: linear-gradient(0deg, rgba(5,5,5,1) 0%, transparent 40%);
+            background: linear-gradient(0deg, var(--bg-light) 0%, transparent 40%);
           }
         }
       `}</style>

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Info, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Info, ChevronLeft, ChevronRight, ShoppingCart } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useCart } from '../context/CartContext';
 
 const Menu = () => {
   const [activeCategory, setActiveCategory] = useState("All");
@@ -11,6 +12,7 @@ const Menu = () => {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const scrollRef = useRef(null);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -138,8 +140,9 @@ const Menu = () => {
                 <span className="price">${item.price.toFixed(2)}</span>
               </div>
               <p>{item.description}</p>
-              <button className="details-btn" onClick={() => setSelectedItem(item)}>
-                View Details
+              <button className="details-btn" onClick={() => addToCart(item)}>
+                <ShoppingCart size={18} />
+                Add to Cart
               </button>
             </div>
           </div>
@@ -177,6 +180,13 @@ const Menu = () => {
                 
                 <div className="modal-footer">
                   <span className="modal-price">${selectedItem.price.toFixed(2)}</span>
+                  <button className="add-to-cart-modal" onClick={() => {
+                    addToCart(selectedItem);
+                    setSelectedItem(null);
+                  }}>
+                    <ShoppingCart size={20} />
+                    Add to Cart
+                  </button>
                 </div>
               </div>
             </div>
@@ -187,7 +197,27 @@ const Menu = () => {
       <style jsx="true">{`
         .menu-section {
           padding: 100px 10%;
-          background: #0d0d0d;
+          background: var(--bg-light);
+          position: relative;
+        }
+
+        .menu-section::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          opacity: 0.3;
+          background-image: radial-gradient(circle at 100% 150%, var(--bg-light) 24%, var(--wave-color) 25%, var(--wave-color) 28%, var(--bg-light) 29%, var(--bg-light) 36%, var(--wave-color) 36%, var(--wave-color) 40%, transparent 40%),
+            radial-gradient(circle at 0 150%, var(--bg-light) 24%, var(--wave-color) 25%, var(--wave-color) 28%, var(--bg-light) 29%, var(--bg-light) 36%, var(--wave-color) 36%, var(--wave-color) 40%, transparent 40%);
+          background-size: 60px 30px;
+          z-index: 0;
+        }
+
+        .section-header, .filter-wrapper, .menu-grid {
+          position: relative;
+          z-index: 1;
         }
 
         .section-header {
@@ -195,12 +225,24 @@ const Menu = () => {
           margin-bottom: 60px;
         }
 
+        .subtitle {
+          color: var(--street-orange);
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          font-size: 0.9rem;
+          display: block;
+          margin-bottom: 10px;
+        }
+
         .section-header h2 {
           font-size: 3.5rem;
+          color: var(--street-black);
+          font-family: var(--font-brush);
         }
 
         .section-header h2 span {
-          color: var(--neon-red);
+          color: var(--street-orange);
         }
 
         .search-container {
@@ -210,6 +252,9 @@ const Menu = () => {
           border-radius: 50px;
           display: flex;
           align-items: center;
+          background: white;
+          box-shadow: var(--shadow-md);
+          border: 1px solid var(--glass-border);
         }
 
         .search-container input {
@@ -217,14 +262,14 @@ const Menu = () => {
           padding: 12px 20px;
           background: transparent;
           border: none;
-          color: white;
+          color: var(--street-black);
           font-family: inherit;
           font-size: 1rem;
           outline: none;
         }
 
         .search-container input::placeholder {
-          color: rgba(255,255,255,0.3);
+          color: var(--muted-gray);
         }
 
         .filter-wrapper {
@@ -235,45 +280,34 @@ const Menu = () => {
         }
 
         .featured-card {
-           border-color: var(--neon-red) !important;
-           box-shadow: 0 0 30px rgba(255, 49, 49, 0.15);
+           border-color: var(--street-orange) !important;
+           box-shadow: 0 15px 40px rgba(255, 107, 0, 0.15) !important;
         }
 
         .featured-badge {
           position: absolute;
           top: 15px;
           right: 15px;
-          background: var(--neon-red);
+          background: var(--street-orange);
           color: white;
           padding: 5px 12px;
-          border-radius: 4px;
+          border-radius: 50px;
           font-size: 0.7rem;
           font-weight: 800;
           text-transform: uppercase;
           letter-spacing: 1px;
           z-index: 5;
-          box-shadow: 0 0 15px rgba(255, 49, 49, 0.5);
-        }
-
-        .filter-wrapper::before,
-        .filter-wrapper::after {
-          content: '';
-          position: absolute;
-          top: 0;
-          width: 80px;
-          height: 100%;
-          z-index: 2;
-          pointer-events: none;
+          box-shadow: 0 4px 10px rgba(255, 107, 0, 0.3);
         }
 
         .filter-wrapper::before {
           left: 0;
-          background: linear-gradient(90deg, #0d0d0d 10%, transparent 100%);
+          background: linear-gradient(90deg, var(--bg-light) 10%, transparent 100%);
         }
 
         .filter-wrapper::after {
           right: 0;
-          background: linear-gradient(-90deg, #0d0d0d 10%, transparent 100%);
+          background: linear-gradient(-90deg, var(--bg-light) 10%, transparent 100%);
         }
 
         .scroll-btn {
@@ -281,8 +315,8 @@ const Menu = () => {
           top: 50%;
           transform: translateY(-50%);
           z-index: 10;
-          background: #111;
-          color: var(--ghost-white);
+          background: white;
+          color: var(--street-black);
           border: 1px solid var(--glass-border);
           border-radius: 50%;
           width: 40px;
@@ -291,13 +325,15 @@ const Menu = () => {
           align-items: center;
           justify-content: center;
           cursor: pointer;
+          box-shadow: var(--shadow-sm);
+          transition: var(--transition);
         }
         
         .scroll-btn:hover {
-          background: var(--neon-red);
+          background: var(--street-orange);
           color: white;
-          border-color: var(--neon-red);
-          box-shadow: 0 0 10px var(--accent-red-glow);
+          border-color: var(--street-orange);
+          box-shadow: var(--shadow-md);
         }
 
         .scroll-btn.left {
@@ -315,28 +351,14 @@ const Menu = () => {
           overflow-x: auto;
           scroll-behavior: smooth;
           scrollbar-width: none;
-          -ms-overflow-style: none;
-          justify-content: center; /* Center by default */
-        }
-
-        @media (max-width: 768px) {
-          .filter-container {
-            justify-content: flex-start;
-            padding: 10px 40px; /* More padding on mobile for the fade effect */
-          }
-          .scroll-btn {
-            display: none; /* Mobile users prefer swiping naturally */
-          }
-        }
-
-        .filter-container::-webkit-scrollbar {
-          display: none; /* Chrome/Safari */
+          justify-content: center;
         }
 
         .filter-btn {
           flex: 0 0 auto;
           padding: 10px 28px;
           border: 1px solid var(--glass-border);
+          background: white;
           color: var(--muted-gray);
           font-weight: 600;
           text-transform: uppercase;
@@ -346,13 +368,14 @@ const Menu = () => {
           border-radius: 50px;
           cursor: pointer;
           white-space: nowrap;
+          box-shadow: var(--shadow-sm);
         }
 
         .filter-btn:hover, .filter-btn.active {
-          border-color: var(--neon-red);
-          color: var(--ghost-white);
-          background: var(--accent-red-glow);
-          box-shadow: 0 0 15px rgba(255, 49, 49, 0.2);
+          border-color: var(--street-orange);
+          color: white;
+          background: var(--street-orange);
+          box-shadow: 0 4px 15px rgba(255, 107, 0, 0.2);
         }
 
         .menu-grid {
@@ -362,21 +385,18 @@ const Menu = () => {
         }
 
         .menu-card {
-          background: var(--bg-card);
-          border-radius: 12px;
+          background: white;
+          border-radius: 20px;
           overflow: hidden;
           border: 1px solid var(--glass-border);
-        }
-
-        @media (max-width: 600px) {
-          .menu-grid {
-            gap: 20px;
-          }
+          transition: var(--transition);
+          box-shadow: var(--shadow-sm);
         }
 
         .menu-card:hover {
-          border-color: rgba(255, 49, 49, 0.3);
-          box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+          transform: translateY(-10px);
+          box-shadow: var(--shadow-lg);
+          border-color: rgba(255, 107, 0, 0.2);
         }
 
         .card-image {
@@ -389,6 +409,11 @@ const Menu = () => {
           width: 100%;
           height: 100%;
           object-fit: cover;
+          transition: transform 0.5s ease;
+        }
+
+        .menu-card:hover .card-image img {
+          transform: scale(1.1);
         }
 
         .card-overlay {
@@ -397,12 +422,13 @@ const Menu = () => {
           left: 0;
           width: 100%;
           height: 100%;
-          background: rgba(0,0,0,0.4);
+          background: rgba(255, 107, 0, 0.2);
           display: flex;
           align-items: center;
           justify-content: center;
           opacity: 0;
           cursor: pointer;
+          transition: var(--transition);
         }
 
         .card-image:hover .card-overlay {
@@ -422,18 +448,19 @@ const Menu = () => {
 
         .card-header h3 {
           font-size: 1.4rem;
-          letter-spacing: 1px;
+          color: var(--street-black);
+          font-weight: 700;
         }
 
         .price {
-          color: var(--neon-red);
-          font-weight: 700;
-          font-size: 1.1rem;
+          color: var(--street-orange);
+          font-weight: 800;
+          font-size: 1.2rem;
         }
 
         .card-info p {
           color: var(--muted-gray);
-          font-size: 0.9rem;
+          font-size: 0.95rem;
           line-height: 1.6;
           margin-bottom: 25px;
           height: 45px;
@@ -446,18 +473,20 @@ const Menu = () => {
           align-items: center;
           justify-content: center;
           gap: 10px;
-          border: 1px solid var(--neon-red);
-          color: var(--neon-red);
+          border: 2px solid var(--street-orange);
+          color: var(--street-orange);
           padding: 12px;
-          border-radius: 6px;
+          border-radius: 12px;
           font-weight: 700;
           text-transform: uppercase;
           font-size: 0.8rem;
+          transition: var(--transition);
         }
 
         .details-btn:hover {
-          background: var(--neon-red);
+          background: var(--street-orange);
           color: white;
+          box-shadow: 0 4px 15px rgba(255, 107, 0, 0.2);
         }
 
         /* Modal Styles */
@@ -467,7 +496,7 @@ const Menu = () => {
           left: 0;
           width: 100%;
           height: 100%;
-          background: rgba(0,0,0,0.85);
+          background: rgba(0,0,0,0.6);
           backdrop-filter: blur(8px);
           z-index: 2000;
           display: flex;
@@ -477,20 +506,29 @@ const Menu = () => {
         }
 
         .modal-content {
+          background: white;
           width: 100%;
           max-width: 900px;
-          border-radius: 20px;
+          border-radius: 30px;
           position: relative;
           overflow: hidden;
+          box-shadow: var(--shadow-lg);
         }
 
         .close-modal {
           position: absolute;
           top: 20px;
-          right: 20px;
-          font-size: 2.5rem;
-          color: white;
+          right: 25px;
+          font-size: 2rem;
+          color: var(--street-black);
           z-index: 10;
+          opacity: 0.5;
+          transition: var(--transition);
+        }
+
+        .close-modal:hover {
+          opacity: 1;
+          color: var(--street-orange);
         }
 
         .modal-body {
@@ -502,37 +540,46 @@ const Menu = () => {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          min-height: 400px;
+          min-height: 500px;
         }
 
         .modal-info {
           padding: 60px 40px;
+          background: white;
         }
 
         .category-tag {
-          color: var(--neon-red);
-          font-weight: 700;
+          color: var(--street-orange);
+          font-weight: 800;
           letter-spacing: 2px;
           text-transform: uppercase;
-          font-size: 0.8rem;
-          margin-bottom: 10px;
+          font-size: 0.75rem;
+          margin-bottom: 12px;
           display: block;
         }
 
         .modal-info h2 {
           font-size: 3rem;
           margin-bottom: 20px;
+          color: var(--street-black);
+          font-family: var(--font-brush);
+          line-height: 1.1;
         }
 
         .modal-desc {
           color: var(--muted-gray);
           line-height: 1.8;
           margin-bottom: 30px;
+          font-size: 1.1rem;
         }
 
         .ingredients h4 {
           margin-bottom: 15px;
-          color: white;
+          color: var(--street-black);
+          font-weight: 700;
+          text-transform: uppercase;
+          font-size: 0.85rem;
+          letter-spacing: 1px;
         }
 
         .tags {
@@ -543,11 +590,13 @@ const Menu = () => {
         }
 
         .tag {
-          background: #222;
-          padding: 6px 15px;
-          border-radius: 4px;
-          font-size: 0.8rem;
-          color: #aaa;
+          background: var(--bg-light);
+          padding: 8px 18px;
+          border-radius: 50px;
+          font-size: 0.85rem;
+          color: var(--muted-gray);
+          border: 1px solid var(--glass-border);
+          font-weight: 600;
         }
 
         .modal-footer {
@@ -559,18 +608,28 @@ const Menu = () => {
         }
 
         .modal-price {
-          font-size: 2rem;
-          font-weight: 700;
-          font-family: 'Anton', sans-serif;
+           color: var(--street-orange);
+          font-size: 2.5rem;
+          font-weight: 800;
         }
 
-        .order-btn-modal {
-          background: var(--neon-red);
+        .add-to-cart-modal {
+          background: var(--street-orange);
           color: white;
           padding: 15px 40px;
-          border-radius: 4px;
+          border-radius: 50px;
           font-weight: 700;
           text-transform: uppercase;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          transition: var(--transition);
+          box-shadow: 0 10px 20px rgba(255, 107, 0, 0.2);
+        }
+
+        .add-to-cart-modal:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 15px 30px rgba(255, 107, 0, 0.3);
         }
 
         @media (max-width: 850px) {
@@ -578,10 +637,13 @@ const Menu = () => {
             grid-template-columns: 1fr;
           }
           .modal-info {
-            padding: 30px;
+            padding: 40px 30px;
           }
           .modal-img img {
-            min-height: 250px;
+            min-height: 300px;
+          }
+          .modal-info h2 {
+            font-size: 2.5rem;
           }
         }
       `}</style>

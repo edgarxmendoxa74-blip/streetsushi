@@ -256,32 +256,49 @@ const AdminDashboard = () => {
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #050505;
+            background: var(--bg-light);
+            position: relative;
             padding: 20px;
           }
+          .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.4;
+            background-image: radial-gradient(circle at 100% 150%, var(--bg-light) 24%, var(--wave-color) 25%, var(--wave-color) 28%, var(--bg-light) 29%, var(--bg-light) 36%, var(--wave-color) 36%, var(--wave-color) 40%, transparent 40%),
+              radial-gradient(circle at 0 150%, var(--bg-light) 24%, var(--wave-color) 25%, var(--wave-color) 28%, var(--bg-light) 29%, var(--bg-light) 36%, var(--wave-color) 36%, var(--wave-color) 40%, transparent 40%);
+            background-size: 60px 30px;
+            z-index: 0;
+          }
           .login-box {
+            position: relative;
+            z-index: 1;
             width: 100%;
             max-width: 400px;
             padding: 40px;
-            border-radius: 12px;
+            border-radius: 24px;
             text-align: center;
+            background: white;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--glass-border);
           }
           .logo-center {
-            font-family: 'Anton', sans-serif;
+            font-family: var(--font-brush);
             font-size: 2.2rem;
-            letter-spacing: 2px;
-            color: white;
+            color: var(--street-black);
             margin-bottom: 30px;
           }
           .logo-center span {
-            color: var(--neon-red);
+            color: var(--street-orange);
           }
           .login-form {
             display: flex;
             flex-direction: column;
             gap: 20px;
           }
-          .input-group text-align: left;
           .input-group label {
             display: block;
             text-align: left;
@@ -290,36 +307,39 @@ const AdminDashboard = () => {
             font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 1px;
+            font-weight: 700;
           }
           .input-group input {
             width: 100%;
             padding: 12px 15px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--glass-border);
-            border-radius: 8px;
-            color: white;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            color: var(--street-black);
             transition: var(--transition);
           }
           .input-group input:focus {
             outline: none;
-            border-color: var(--neon-red);
+            border-color: var(--street-orange);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(255, 107, 0, 0.1);
           }
           .error-text {
-            color: var(--neon-red);
+            color: #ef4444;
             font-size: 0.85rem;
           }
           .login-btn {
-            background: var(--neon-red);
+            background: var(--street-orange);
             color: white;
             padding: 12px;
-            border-radius: 8px;
+            border-radius: 12px;
             font-weight: 700;
             text-transform: uppercase;
             transition: var(--transition);
             margin-top: 10px;
           }
           .login-btn:hover {
-            box-shadow: 0 0 15px rgba(255, 49, 49, 0.4);
+            box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3);
           }
           .back-btn-center {
             margin-top: 25px;
@@ -331,7 +351,7 @@ const AdminDashboard = () => {
             font-size: 0.9rem;
           }
           .back-btn-center:hover {
-            color: white;
+            color: var(--street-orange);
           }
         `}</style>
       </div>
@@ -341,7 +361,7 @@ const AdminDashboard = () => {
   return (
     <div className="admin-layout">
       {/* Sidebar */}
-      <aside className="sidebar glass">
+      <aside className="sidebar">
         <div className="sidebar-header">
           <div className="logo">
             STREET<span>ADMIN</span>
@@ -396,7 +416,7 @@ const AdminDashboard = () => {
                 </button>
               </div>
 
-              <div className="table-container glass">
+              <div className="table-container">
                 <table className="admin-table">
                   <thead>
                     <tr>
@@ -441,7 +461,7 @@ const AdminDashboard = () => {
              >
                <div className="settings-grid">
                   {/* General Settings */}
-                  <form onSubmit={handleUpdateSiteSettings} className="settings-card glass">
+                  <form onSubmit={handleUpdateSiteSettings} className="settings-card">
                     <h3>Logo & Branding</h3>
                     <div className="form-group">
                       <label>Site Logo</label>
@@ -539,7 +559,7 @@ const AdminDashboard = () => {
                   </form>
 
                   {/* Slideshow Settings */}
-                  <div className="settings-card glass">
+                  <div className="settings-card">
                     <h3>Hero Slideshow (4 Images)</h3>
                     <div className="slides-list">
                       {heroSlides.map((slide, idx) => (
@@ -587,7 +607,7 @@ const AdminDashboard = () => {
           )}
 
           {activeTab === 'settings' && (
-            <div className="coming-soon glass">
+            <div className="coming-soon">
               <h3>Module in Development</h3>
               <p>This section is currently being integrated with Supabase.</p>
             </div>
@@ -600,7 +620,7 @@ const AdminDashboard = () => {
             <motion.div 
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="modal-form-container glass"
+              className="modal-form-container"
             >
               <h3>{editingItem ? 'Edit Menu Item' : 'Add New Item'}</h3>
               <form onSubmit={handleSave} className="item-form">
@@ -700,29 +720,37 @@ const AdminDashboard = () => {
       </main>
 
       <style jsx="true">{`
+        /* Dashboard Layout */
         .admin-layout {
           display: flex;
           min-height: 100vh;
-          background: #050505;
-          color: white;
+          background: #f5f7f9;
+          color: var(--street-black);
         }
 
-        /* Sidebar Styles */
         .sidebar {
           width: 280px;
-          border-right: 1px solid var(--glass-border);
+          border-right: 1px solid #e5e7eb;
           display: flex;
           flex-direction: column;
           position: sticky;
           top: 0;
           height: 100vh;
-          background: rgba(10, 10, 10, 0.95);
+          background: white;
+          z-index: 100;
         }
 
         .sidebar-header {
           padding: 30px;
-          border-bottom: 1px solid var(--glass-border);
+          border-bottom: 1px solid #f3f4f6;
         }
+
+        .sidebar-header .logo {
+          font-family: var(--font-brush);
+          font-size: 1.8rem;
+          color: var(--street-black);
+        }
+        .sidebar-header .logo span { color: var(--street-orange); }
 
         .sidebar-nav {
           padding: 30px 15px;
@@ -738,36 +766,35 @@ const AdminDashboard = () => {
           gap: 15px;
           width: 100%;
           padding: 15px 20px;
-          border-radius: 8px;
-          color: var(--muted-gray);
+          border-radius: 12px;
+          color: #6b7280;
           font-weight: 600;
           transition: var(--transition);
           text-align: left;
         }
 
         .nav-btn:hover, .nav-btn.active {
-          background: rgba(255, 49, 49, 0.1);
-          color: var(--neon-red);
+          background: rgba(255, 107, 0, 0.05);
+          color: var(--street-orange);
         }
 
         .sidebar-footer {
           padding: 30px;
-          border-top: 1px solid var(--glass-border);
+          border-top: 1px solid #f3f4f6;
         }
 
         .back-btn {
           display: flex;
           align-items: center;
           gap: 10px;
-          color: var(--muted-gray);
+          color: #6b7280;
           transition: var(--transition);
         }
 
         .back-btn:hover {
-          color: white;
+          color: var(--street-orange);
         }
 
-        /* Main Content */
         .admin-content {
           flex: 1;
           display: flex;
@@ -777,29 +804,24 @@ const AdminDashboard = () => {
 
         .admin-header {
           height: 80px;
-          border-bottom: 1px solid var(--glass-border);
+          border-bottom: 1px solid #e5e7eb;
           display: flex;
           align-items: center;
           justify-content: space-between;
           padding: 0 40px;
-          background: rgba(10, 10, 10, 0.5);
+          background: white;
         }
 
-        .admin-user {
-          display: flex;
-          align-items: center;
-          gap: 15px;
-        }
-
-        .user-role {
-          font-size: 0.85rem;
-          color: var(--muted-gray);
+        .admin-header h2 {
+          font-size: 1.25rem;
+          font-weight: 700;
         }
 
         .user-avatar {
           width: 40px;
           height: 40px;
-          background: var(--neon-red);
+          background: var(--street-orange);
+          color: white;
           border-radius: 50%;
           display: flex;
           align-items: center;
@@ -810,42 +832,11 @@ const AdminDashboard = () => {
         .admin-body {
           padding: 40px;
           flex: 1;
+          max-width: 1200px;
+          width: 100%;
+          margin: 0 auto;
         }
 
-        /* Stats Dashboard */
-        .dashboard-stats {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: 30px;
-        }
-
-        .stat-card {
-          padding: 30px;
-          border-radius: 12px;
-        }
-
-        .stat-card h3 {
-          font-size: 1rem;
-          color: var(--muted-gray);
-          margin-bottom: 15px;
-        }
-
-        .stat-value {
-          display: block;
-          font-size: 2.5rem;
-          font-weight: bold;
-          font-family: 'Anton', sans-serif;
-          margin-bottom: 10px;
-        }
-
-        .stat-change {
-          font-size: 0.85rem;
-        }
-
-        .stat-change.positive { color: #00ff88; }
-        .stat-change.neutral { color: var(--muted-gray); }
-
-        /* Menu Manager */
         .manager-toolbar {
           display: flex;
           justify-content: space-between;
@@ -853,86 +844,87 @@ const AdminDashboard = () => {
         }
 
         .admin-search {
-          background: rgba(255,255,255,0.05);
-          border: 1px solid var(--glass-border);
+          background: white;
+          border: 1px solid #e5e7eb;
           padding: 12px 20px;
-          border-radius: 8px;
-          color: white;
+          border-radius: 12px;
+          color: var(--street-black);
           width: 300px;
+          box-shadow: var(--shadow-sm);
         }
 
         .admin-search:focus {
-          border-color: var(--neon-red);
+          border-color: var(--street-orange);
           outline: none;
+          box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
         }
 
         .add-item-btn {
           display: flex;
           align-items: center;
           gap: 10px;
-          background: var(--neon-red);
+          background: var(--street-orange);
           color: white;
           padding: 12px 24px;
-          border-radius: 8px;
+          border-radius: 12px;
           font-weight: 600;
           transition: var(--transition);
         }
 
         .add-item-btn:hover {
-          box-shadow: 0 0 20px rgba(255, 49, 49, 0.4);
+          box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3);
+          transform: translateY(-1px);
         }
 
-        /* Table */
         .table-container {
-          border-radius: 12px;
+          background: white;
+          border-radius: 20px;
           overflow: hidden;
+          box-shadow: var(--shadow-md);
+          border: 1px solid #e5e7eb;
         }
 
         .admin-table {
           width: 100%;
           border-collapse: collapse;
-          text-align: left;
         }
 
         .admin-table th {
-          background: rgba(255,255,255,0.02);
+          background: #f9fafb;
           padding: 20px;
-          color: var(--muted-gray);
-          font-weight: 600;
-          border-bottom: 1px solid var(--glass-border);
+          color: #4b5563;
+          font-weight: 700;
+          text-transform: uppercase;
+          font-size: 0.75rem;
+          letter-spacing: 1px;
+          border-bottom: 1px solid #e5e7eb;
+          text-align: left;
         }
 
         .admin-table td {
           padding: 20px;
-          border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .item-cell {
-          display: flex;
-          align-items: center;
-          gap: 15px;
-          font-weight: 600;
+          border-bottom: 1px solid #f3f4f6;
+          color: #4b5563;
         }
 
         .item-thumb {
-          width: 50px;
-          height: 50px;
-          border-radius: 8px;
+          width: 60px;
+          height: 60px;
+          border-radius: 12px;
           object-fit: cover;
         }
 
         .status-badge {
-          background: rgba(0, 255, 136, 0.1);
-          color: #00ff88;
-          padding: 6px 12px;
+          background: #ecfdf5;
+          color: #059669;
+          padding: 6px 14px;
           border-radius: 50px;
-          font-size: 0.8rem;
-          font-weight: bold;
+          font-size: 0.75rem;
+          font-weight: 700;
         }
-
-        .actions-cell {
-          display: flex;
-          gap: 10px;
+        .status-badge.featured {
+          background: #fff7ed;
+          color: var(--street-orange);
         }
 
         .action-btn {
@@ -946,305 +938,92 @@ const AdminDashboard = () => {
         }
 
         .action-btn.edit {
-          background: rgba(255,255,255,0.05);
-          color: white;
+          background: #f3f4f6;
+          color: #4b5563;
         }
-
-        .action-btn.edit:hover { background: rgba(255,255,255,0.1); }
+        .action-btn.edit:hover { background: #e5e7eb; color: var(--street-black); }
 
         .action-btn.delete {
-          background: rgba(255, 49, 49, 0.1);
-          color: var(--neon-red);
+          background: #fef2f2;
+          color: #ef4444;
         }
+        .action-btn.delete:hover { background: #ef4444; color: white; }
 
-        .action-btn.delete:hover {
-          background: var(--neon-red);
-          color: white;
-        }
-
-        .coming-soon {
-          padding: 60px;
-          text-align: center;
-          border-radius: 12px;
-        }
-
-        .coming-soon h3 {
-          margin-bottom: 10px;
-          color: var(--neon-red);
-        }
-
-        @media (max-width: 1024px) {
-          .admin-layout {
-            flex-direction: column;
-          }
-          .sidebar {
-            width: 100%;
-            height: auto;
-            position: relative;
-          }
-          .sidebar-nav {
-            flex-direction: row;
-            overflow-x: auto;
-          }
-          .manager-toolbar {
-            flex-direction: column;
-            gap: 20px;
-          }
-          .admin-search {
-            width: 100%;
-          }
-          .table-container {
-            overflow-x: auto;
-          }
-        }
-
-        /* Modal & Form Styles */
-        .modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0,0,0,0.8);
-          backdrop-filter: blur(10px);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 3000;
-          padding: 20px;
-        }
-
-        .modal-form-container {
-          width: 100%;
-          max-width: 600px;
-          padding: 40px;
-          border-radius: 12px;
-        }
-
-        .modal-form-container h3 {
+        .settings-card {
+          background: white;
+          padding: 30px;
+          border-radius: 20px;
+          box-shadow: var(--shadow-md);
+          border: 1px solid #e5e7eb;
           margin-bottom: 30px;
-          font-size: 1.8rem;
-          color: var(--neon-red);
         }
-
-        .item-form {
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-        }
-
-        .form-row {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 20px;
-        }
-
-        .form-group {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
+        .settings-card h3 {
+          color: var(--street-black);
+          font-weight: 700;
+          margin-bottom: 25px;
         }
 
         .form-group label {
-          font-size: 0.85rem;
-          color: var(--muted-gray);
-          text-transform: uppercase;
-          letter-spacing: 1px;
+          color: #374151;
+          font-weight: 600;
+          display: block;
+          margin-bottom: 8px;
         }
 
-        .form-group input, 
-        .form-group select, 
-        .form-group textarea {
-          background: rgba(255,255,255,0.05);
-          border: 1px solid var(--glass-border);
+        .form-group input, .form-group select, .form-group textarea {
+          width: 100%;
+          background: #f9fafb;
+          border: 1px solid #e5e7eb;
+          color: var(--street-black);
+          border-radius: 12px;
           padding: 12px;
-          border-radius: 6px;
-          color: white;
           font-family: inherit;
         }
-
-        .form-group textarea {
-          min-height: 100px;
-          resize: vertical;
+        .form-group input:focus {
+          border-color: var(--street-orange);
+          background: white;
+          outline: none;
         }
 
-        .checkbox-group {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .checkbox-group input {
-          width: 18px;
-          height: 18px;
-          accent-color: var(--neon-red);
-        }
-
-        .modal-actions {
-          display: flex;
-          justify-content: flex-end;
-          gap: 15px;
-          margin-top: 20px;
-        }
-
-        .cancel-btn {
-          padding: 12px 24px;
-          color: var(--muted-gray);
-          font-weight: 600;
-        }
-
-        .save-btn {
-          background: var(--neon-red);
-          color: white;
-          padding: 12px 30px;
-          border-radius: 6px;
-          font-weight: 700;
-          text-transform: uppercase;
-          transition: var(--transition);
-        }
-
-        .save-btn:hover {
-          box-shadow: 0 0 15px var(--neon-red);
-        }
-
-        /* Site Settings Styles */
-        .site-settings-container {
-           width: 100%;
-        }
-        .settings-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 30px;
-        }
-        .settings-card {
-          padding: 30px;
-          border-radius: 12px;
-        }
-        .settings-card h3 {
-          margin-bottom: 25px;
-          color: var(--neon-red);
-          font-family: 'Anton', sans-serif;
-          letter-spacing: 1px;
-        }
-        .contact-divider {
-          margin: 30px 0 15px;
-          padding-bottom: 10px;
-          border-bottom: 1px solid var(--glass-border);
-          color: var(--neon-red);
-          font-size: 0.9rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-        }
-        .save-settings-btn {
+        .modal-form-container {
+          background: white;
+          border-radius: 24px;
+          box-shadow: var(--shadow-lg);
+          padding: 40px;
+          max-width: 600px;
           width: 100%;
-          margin-top: 20px;
-          background: var(--neon-red);
-          color: white;
-          padding: 12px;
-          border-radius: 6px;
-          font-weight: 700;
-          text-transform: uppercase;
         }
-        .slides-list {
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-        }
-        .slide-edit-row {
-          display: flex;
-          gap: 15px;
-          align-items: center;
-          padding: 15px;
-          background: rgba(255,255,255,0.02);
-          border-radius: 8px;
-          border: 1px solid var(--glass-border);
-        }
-        .slide-preview {
-          width: 80px;
-          height: 60px;
-          border-radius: 4px;
-          overflow: hidden;
-        }
-        .slide-preview img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-        .slide-input {
-          flex: 1;
-        }
-        .input-with-action {
-          display: flex;
-          gap: 10px;
-          align-items: center;
-          background: rgba(255,255,255,0.03);
-          padding: 8px 12px;
-          border-radius: 8px;
-          border: 1px solid var(--glass-border);
-        }
-        .current-url-display {
-          font-size: 0.75rem;
-          color: var(--muted-gray);
-          flex: 1;
-        }
-        .truncate {
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          max-width: 150px;
-        }
-        .logo-upload-control {
-           flex: 1;
-           padding: 0 10px;
-        }
-        .logo-upload-control .current-url-display {
-           font-size: 0.85rem;
-        }
-        @media (max-width: 1200px) {
-          .settings-grid {
-            grid-template-columns: 1fr;
-          }
-        }
+        .modal-form-container h3 { color: var(--street-black); font-family: var(--font-brush); font-size: 2.2rem; margin-bottom: 30px;}
 
-        /* Upload Styling */
-        .input-with-upload {
-          display: flex;
-          gap: 10px;
-          align-items: center;
-        }
-        .input-with-upload input {
-          flex: 1;
-        }
-        .upload-label {
-          cursor: pointer;
-        }
+        .save-btn { border-radius: 12px; background: var(--street-orange); color: white; padding: 12px 30px; font-weight: 700; text-transform: uppercase; }
+        .save-btn:hover { box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3); }
+
+        .cancel-btn { padding: 12px 24px; color: var(--muted-gray); font-weight: 600; }
+
         .upload-btn {
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid var(--glass-border);
-          color: var(--muted-gray);
+          background: #f3f4f6;
+          border: 1px solid #e5e7eb;
           width: 45px;
           height: 45px;
           display: flex;
-          align-items: center;      /* Vertically center the icon */
-          justify-content: center;   /* Horizontally center the icon */
+          align-items: center;
+          justify-content: center;
           border-radius: 8px;
-          transition: var(--transition);
+          cursor: pointer;
         }
         .upload-btn:hover {
-          background: rgba(255, 49, 49, 0.1);
-          color: var(--neon-red);
-          border-color: var(--neon-red);
+          background: rgba(255, 107, 0, 0.1);
+          color: var(--street-orange);
+          border-color: var(--street-orange);
         }
-        .upload-btn.loading {
-          opacity: 0.5;
-          pointer-events: none;
-          animation: pulse 1.5s infinite;
-        }
-        .upload-btn.min-btn {
-           width: 40px;
-           height: 40px;
-        }
+
+        .input-with-upload { display: flex; gap: 10px; align-items: center; }
+        .input-with-upload input { flex: 1; }
+
+        .checkbox-group { display: flex; align-items: center; gap: 10px; }
+        .checkbox-group input { width: 18px; height: 18px; accent-color: var(--street-orange); }
+
+        .modal-actions { display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px; }
 
         @keyframes pulse {
           0% { opacity: 0.5; }

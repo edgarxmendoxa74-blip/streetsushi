@@ -1,20 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Anton&family=Outfit:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Noto+Sans+JP:wght@400;700&family=Outfit:wght@300;400;600;700&display=swap');
 
 :root {
-  --bg-dark: #0a0a0a;
-  --bg-card: #141414;
-  --neon-red: #ff3131;
-  --ghost-white: #f8f8f8;
-  --muted-gray: #888888;
-  --accent-red-glow: rgba(255, 49, 49, 0.2);
-  --glass-bg: rgba(20, 20, 20, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --bg-light: #fdfcfb;
+  --bg-card: #ffffff;
+  --street-orange: #ff6b00;
+  --street-black: #1a1a1a;
+  --muted-gray: #71717a;
+  --wave-color: #f1f4f6;
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(0, 0, 0, 0.05);
   
   --font-main: 'Outfit', sans-serif;
-  --font-heading: 'Anton', sans-serif;
+  --font-heading: 'Outfit', sans-serif;
+  --font-brush: 'Caveat', cursive;
+  --font-jp: 'Noto Sans JP', sans-serif;
   
-  --transition: none;
-  --shadow-neon: 0 0 20px rgba(255, 49, 49, 0.3);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 * {
@@ -25,16 +29,17 @@
 
 body {
   font-family: var(--font-main);
-  background-color: var(--bg-dark);
-  color: var(--ghost-white);
+  background-color: var(--bg-light);
+  color: var(--street-black);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3 {
   font-family: var(--font-heading);
-  text-transform: uppercase;
-  letter-spacing: 2px;
+  text-transform: none;
+  font-weight: 700;
+  letter-spacing: -0.025em;
 }
 
 ul {
@@ -60,7 +65,7 @@ button {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-dark);
+  background: var(--bg-light);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -69,14 +74,22 @@ button {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--neon-red);
+  background: var(--street-orange);
 }
 
 /* Glassmorphism Utility */
 .glass {
   background: var(--glass-bg);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
+}
+
+.wave-bg {
+  background-color: var(--bg-light);
+  background-image: radial-gradient(circle at 100% 150%, var(--bg-light) 24%, var(--wave-color) 25%, var(--wave-color) 28%, var(--bg-light) 29%, var(--bg-light) 36%, var(--wave-color) 36%, var(--wave-color) 40%, transparent 40%),
+    radial-gradient(circle at 0 150%, var(--bg-light) 24%, var(--wave-color) 25%, var(--wave-color) 28%, var(--bg-light) 29%, var(--bg-light) 36%, var(--wave-color) 36%, var(--wave-color) 40%, transparent 40%),
+    radial-gradient(circle at 50% 100%, var(--wave-color) 10%, var(--bg-light) 11%, var(--bg-light) 23%, var(--wave-color) 24%, var(--wave-color) 30%, var(--bg-light) 31%, var(--bg-light) 43%, var(--wave-color) 44%, var(--wave-color) 50%, var(--bg-light) 51%);
+  background-size: 60px 30px;
 }
 
