@@ -34,6 +34,65 @@ const Navbar = () => {
         </div>
         
         <div className="nav-actions">
+          <div className="contact-wrapper">
+            <button 
+              className={`order-btn ${isDropdownOpen ? 'active' : ''}`}
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            >
+              Contact
+            </button>
+
+            {isDropdownOpen && (
+              <div className="contact-dropdown glass">
+                <div className="dropdown-header">Visit Us & Connect</div>
+                
+                <div className="social-links-grid">
+                  {contactInfo?.fb_url && (
+                    <a href={contactInfo.fb_url} target="_blank" rel="noopener noreferrer" className="social-item">
+                      <FacebookIcon size={18} />
+                      <span>Facebook</span>
+                    </a>
+                  )}
+                  {contactInfo?.ig_url && (
+                    <a href={contactInfo.ig_url} target="_blank" rel="noopener noreferrer" className="social-item">
+                      <InstagramIcon size={18} />
+                      <span>Instagram</span>
+                    </a>
+                  )}
+                  {contactInfo?.tiktok_url && (
+                    <a href={contactInfo.tiktok_url} target="_blank" rel="noopener noreferrer" className="social-item">
+                      <TikTokIcon size={18} />
+                      <span>TikTok</span>
+                    </a>
+                  )}
+                </div>
+
+                <div className="dropdown-divider"></div>
+
+                <div className="contact-details">
+                  {contactInfo?.contact_number && (
+                    <a href={`tel:${contactInfo.contact_number}`} className="detail-item">
+                      <Phone size={16} />
+                      <div>
+                        <label>Call Us</label>
+                        <span>{contactInfo.contact_number}</span>
+                      </div>
+                    </a>
+                  )}
+                  {contactInfo?.location && (
+                    <div className="detail-item">
+                      <MapPin size={16} />
+                      <div>
+                        <label>Location</label>
+                        <span>{contactInfo.location}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="cart-wrapper">
             <button 
               className={`icon-btn cart-btn ${isCartOpen ? 'active' : ''}`}
@@ -243,65 +302,6 @@ const Navbar = () => {
               )}
             </AnimatePresence>
           </div>
-
-          <div className="contact-wrapper">
-            <button 
-              className={`order-btn ${isDropdownOpen ? 'active' : ''}`}
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            >
-              Contact
-            </button>
-
-            {isDropdownOpen && (
-              <div className="contact-dropdown glass">
-                <div className="dropdown-header">Visit Us & Connect</div>
-                
-                <div className="social-links-grid">
-                  {contactInfo?.fb_url && (
-                    <a href={contactInfo.fb_url} target="_blank" rel="noopener noreferrer" className="social-item">
-                      <FacebookIcon size={18} />
-                      <span>Facebook</span>
-                    </a>
-                  )}
-                  {contactInfo?.ig_url && (
-                    <a href={contactInfo.ig_url} target="_blank" rel="noopener noreferrer" className="social-item">
-                      <InstagramIcon size={18} />
-                      <span>Instagram</span>
-                    </a>
-                  )}
-                  {contactInfo?.tiktok_url && (
-                    <a href={contactInfo.tiktok_url} target="_blank" rel="noopener noreferrer" className="social-item">
-                      <TikTokIcon size={18} />
-                      <span>TikTok</span>
-                    </a>
-                  )}
-                </div>
-
-                <div className="dropdown-divider"></div>
-
-                <div className="contact-details">
-                  {contactInfo?.contact_number && (
-                    <a href={`tel:${contactInfo.contact_number}`} className="detail-item">
-                      <Phone size={16} />
-                      <div>
-                        <label>Call Us</label>
-                        <span>{contactInfo.contact_number}</span>
-                      </div>
-                    </a>
-                  )}
-                  {contactInfo?.location && (
-                    <div className="detail-item">
-                      <MapPin size={16} />
-                      <div>
-                        <label>Location</label>
-                        <span>{contactInfo.location}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
         </div>
       </div>
 
@@ -328,10 +328,14 @@ const Navbar = () => {
         }
 
         .logo-img {
-          height: 45px;
-          width: auto;
+          height: 60px;
+          width: 60px;
+          object-fit: cover;
+          border-radius: 50%;
           display: block;
-          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+          filter: drop-shadow(0 4px 10px rgba(0,0,0,0.1));
+          border: 2px solid white;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
 
         .nav-links {
