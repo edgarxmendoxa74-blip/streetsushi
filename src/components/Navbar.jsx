@@ -1,17 +1,15 @@
 import { Menu as MenuIcon, ShoppingBag, MapPin, Phone, MessageCircle, ExternalLink, X, Plus, Minus, Trash2, ArrowRight, User, Hash } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { useCart } from '../context/CartContext';
 
 const Navbar = () => {
+  const navigate = useNavigate();
   const [logo, setLogo] = useState('/logo.png');
   const [contactInfo, setContactInfo] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isCheckoutMode, setIsCheckoutMode] = useState(false);
-  const [customerDetails, setCustomerDetails] = useState({ name: '', phone: '' });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [orderSuccess, setOrderSuccess] = useState(false);
 
   const { cart, cartCount, cartTotal, removeFromCart, updateQuantity, isCartOpen, setIsCartOpen, toggleCart, clearCart } = useCart();
 
@@ -120,132 +118,14 @@ const Navbar = () => {
                     transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                   >
                     <div className="sidebar-header">
-                      <h3>{isCheckoutMode ? 'Checkout' : 'Your Bag'}</h3>
-                      <button className="close-btn" onClick={() => {
-                        setIsCartOpen(false);
-                        setTimeout(() => setIsCheckoutMode(false), 300);
-                      }}>
+                      <h3>Your Bag</h3>
+                      <button className="close-btn" onClick={() => setIsCartOpen(false)}>
                         <X size={24} />
                       </button>
                     </div>
 
                     <div className="sidebar-content">
-                      {orderSuccess ? (
-                        <motion.div 
-                          className="success-message"
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                        >
-                          <div className="success-icon">✓</div>
-                          <h2>Order Received!</h2>
-                          <p>We're starting to prepare your sushi. See you at the counter!</p>
-                          <button className="done-btn" onClick={() => {
-                            setOrderSuccess(false);
-                            setIsCartOpen(false);
-                            setIsCheckoutMode(false);
-                          }}>
-                            Back to Menu
-                          </button>
-                        </motion.div>
-                      ) : isCheckoutMode ? (
-                        <div className="checkout-form">
-                          <div className="form-info">
-                            <span className="badge">Walk-in Order Only</span>
-                            <p>Fill out your details for pickup at the counter.</p>
-                          </div>
-                          
-                          <div className="input-group">
-                            <label><User size={16} /> Your Name</label>
-                            <input 
-                              type="text" 
-                              placeholder="Enter your full name" 
-                              value={customerDetails.name}
-                              onChange={e => setCustomerDetails({...customerDetails, name: e.target.value})}
-                              required
-                            />
-                          </div>
-
-                          <div className="input-group">
-                            <label><Phone size={16} /> Phone Number (Optional)</label>
-                            <input 
-                              type="tel" 
-                              placeholder="09XX XXX XXXX" 
-                              value={customerDetails.phone}
-                              onChange={e => setCustomerDetails({...customerDetails, phone: e.target.value})}
-                            />
-                          </div>
-
-                          <div className="order-summary-box">
-                            <h4>Order Summary</h4>
-                            <div className="summary-items">
-                              {cart.map(item => (
-                                <div key={item.id} className="summary-line">
-                                  <span>{item.quantity}x {item.name}</span>
-                                  <span>${(item.price * item.quantity).toFixed(2)}</span>
-                                </div>
-                              ))}
-                            </div>
-                            <div className="summary-total">
-                              <span>Total Amount</span>
-                              <span>${cartTotal.toFixed(2)}</span>
-                            </div>
-                          </div>
-
-                          <div className="checkout-actions">
-                            <button className="back-btn-text" onClick={() => setIsCheckoutMode(false)}>
-                              Edit Bag
-                            </button>
-                            <button 
-                              className={`place-order-btn ${isSubmitting ? 'loading' : ''}`}
-                              disabled={isSubmitting || !customerDetails.name}
-                              onClick={async () => {
-                                if (!customerDetails.name) return;
-                                setIsSubmitting(true);
-                                try {
-                                  // 1. Insert order
-                                  const { data: order, error: orderError } = await supabase
-                                    .from('orders')
-                                    .insert([{
-                                      customer_name: customerDetails.name,
-                                      customer_phone: customerDetails.phone,
-                                      total_price: cartTotal,
-                                      order_type: 'walk-in'
-                                    }])
-                                    .select()
-                                    .single();
-                                  
-                                  if (orderError) throw orderError;
-
-                                  // 2. Insert order items
-                                  const orderItems = cart.map(item => ({
-                                    order_id: order.id,
-                                    menu_item_id: item.id,
-                                    quantity: item.quantity,
-                                    price_at_time: item.price,
-                                    item_name: item.name
-                                  }));
-
-                                  const { error: itemsError } = await supabase
-                                    .from('order_items')
-                                    .insert(orderItems);
-                                  
-                                  if (itemsError) throw itemsError;
-
-                                  setOrderSuccess(true);
-                                  clearCart();
-                                  setCustomerDetails({ name: '', phone: '' });
-                                } catch (err) {
-                                  alert('Error processing order: ' + err.message);
-                                } finally {
-                                  setIsSubmitting(false);
-                                }
-                              }}
-                            >
-                              {isSubmitting ? 'Processing...' : 'Confirm Order'}
-                            </button>
-                          </div>
-                        </div>
-                      ) : cart.length === 0 ? (
+                      {cart.length === 0 ? (
                         <div className="empty-cart">
                           <ShoppingBag size={64} />
                           <p>Your bag is empty</p>
@@ -290,7 +170,10 @@ const Navbar = () => {
                                 <span>${cartTotal.toFixed(2)}</span>
                               </div>
                             </div>
-                            <button className="checkout-btn" onClick={() => setIsCheckoutMode(true)}>
+                            <button className="checkout-btn" onClick={() => {
+                              setIsCartOpen(false);
+                              navigate('/checkout');
+                            }}>
                               Proceed to Checkout <ArrowRight size={18} />
                             </button>
                           </div>

@@ -4,6 +4,7 @@ import { CartProvider } from './context/CartContext';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Menu from './components/Menu';
+import Checkout from './components/Checkout';
 import AdminDashboard from './components/AdminDashboard';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
               </main>
             </div>
           } />
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </BrowserRouter>
