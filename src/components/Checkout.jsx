@@ -693,10 +693,28 @@ const Checkout = () => {
           .summary-card { position: static; }
         }
 
-        @media (max-width: 600px) {
-          .input-row { grid-template-columns: 1fr; }
-          .checkout-header h1 { font-size: 2.5rem; }
-          .details-form { padding: 30px; }
+        @media (max-width: 768px) {
+          .checkout-page {
+            padding: 40px 4%;
+          }
+          .checkout-header h1 {
+            font-size: 2.8rem;
+          }
+          .details-form {
+            padding: 25px;
+          }
+          .input-row {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .checkout-header h1 {
+            font-size: 2.2rem;
+          }
+          .section-title h3 {
+            font-size: 1.1rem;
+          }
         }
       `}</style>
     </div>

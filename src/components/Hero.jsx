@@ -188,6 +188,19 @@ const Hero = () => {
             background: linear-gradient(0deg, var(--bg-light) 0%, transparent 40%);
           }
         }
+
+        @media (max-width: 480px) {
+          .hero-title {
+            font-size: 2.8rem;
+          }
+          .hero-desc {
+            font-size: 1rem;
+          }
+          .subtitle-brand {
+            letter-spacing: 3px;
+            font-size: 0.75rem;
+          }
+        }
       `}</style>
     </section>
   );

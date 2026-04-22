@@ -425,9 +425,28 @@ const Contact = () => {
           .hero-content h1 { font-size: 3rem; }
         }
 
-        @media (max-width: 600px) {
-          .input-row { grid-template-columns: 1fr; }
-          .form-wrapper { padding: 30px; }
+        @media (max-width: 768px) {
+          .contact-hero {
+            padding: 100px 5% 60px;
+          }
+          .hero-content h1 {
+            font-size: 2.5rem;
+          }
+          .form-wrapper {
+            padding: 30px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .hero-content h1 {
+            font-size: 2.2rem;
+          }
+          .input-row {
+            grid-template-columns: 1fr;
+          }
+          .info-card {
+            padding: 25px;
+          }
         }
       `}</style>
     </div>

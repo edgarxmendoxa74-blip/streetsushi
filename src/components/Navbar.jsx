@@ -532,6 +532,40 @@ const Navbar = () => {
 
         .summary-row.total span:last-child { color: var(--street-orange); }
 
+        .total-row span:last-child { color: var(--street-orange); }
+
+        @media (max-width: 768px) {
+          .navbar {
+            padding: 0 4%;
+            height: 70px;
+          }
+          .logo-img {
+            height: 45px;
+            width: 45px;
+          }
+          .order-btn {
+            padding: 8px 16px;
+            font-size: 0.7rem;
+          }
+          .cart-sidebar {
+            width: 100%;
+            max-width: 100%;
+          }
+          .sidebar-header h3 {
+            font-size: 1.2rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .nav-actions {
+            gap: 10px;
+          }
+          .cart-btn {
+            width: 40px;
+            height: 40px;
+          }
+        }
+
         .checkout-btn {
           width: 100%;
           background: var(--street-orange);

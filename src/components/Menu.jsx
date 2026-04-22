@@ -646,6 +646,41 @@ const Menu = () => {
             font-size: 2.5rem;
           }
         }
+
+        @media (max-width: 768px) {
+          .menu-section {
+            padding: 60px 5%;
+          }
+          .section-header h2 {
+            font-size: 2.8rem;
+          }
+          .menu-grid {
+            grid-template-columns: 1fr;
+            gap: 25px;
+          }
+          .card-image {
+            height: 200px;
+          }
+          .filter-container {
+            justify-content: flex-start;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .section-header h2 {
+            font-size: 2.2rem;
+          }
+          .modal-info h2 {
+            font-size: 2rem;
+          }
+          .add-to-cart-modal {
+            padding: 12px 20px;
+            font-size: 0.8rem;
+          }
+          .modal-price {
+            font-size: 1.8rem;
+          }
+        }
       `}</style>
     </section>
   );
