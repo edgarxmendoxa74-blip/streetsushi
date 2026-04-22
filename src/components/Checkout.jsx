@@ -119,9 +119,9 @@ const Checkout = () => {
           <div className="order-next-steps">
             <h3>What's Next?</h3>
             <ul>
-              <li>Head to the counter at Street Sushi.</li>
-              <li>Provide your name: <strong>{customerDetails.name}</strong></li>
-              <li>Pay and enjoy your meal!</li>
+              <li>Visit the <strong>Street Sushi</strong> counter.</li>
+              <li>Give your name: <strong>{customerDetails.name}</strong></li>
+              <li>Complete payment and enjoy your meal!</li>
             </ul>
           </div>
           <button className="return-btn" onClick={() => navigate('/')}>
@@ -294,7 +294,7 @@ const Checkout = () => {
                 </div>
                 <div className="form-info-alert">
                   <span className="badge">Walk-in Order Only</span>
-                  <p>Pay at the counter when you pick up your order.</p>
+                  <p>Visit our counter to pay and receive your fresh sushi.</p>
                 </div>
                 
                 <div className="input-row">
@@ -329,8 +329,8 @@ const Checkout = () => {
                   <div className="payment-card active">
                     <CreditCard size={24} />
                     <div>
-                      <label>Pay at Counter</label>
-                      <span>Cash or Digital Pay upon pickup</span>
+                      <label>Walk-in Only</label>
+                      <span>Cash or Digital Pay at the counter</span>
                     </div>
                     <div className="check">✓</div>
                   </div>
