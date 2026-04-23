@@ -20,6 +20,7 @@ const AdminDashboard = () => {
     logo_url: '',
     hero_title: '',
     hero_subtitle: '',
+    hero_description: '',
     fb_url: '',
     ig_url: '',
     tiktok_url: '',
@@ -43,15 +44,6 @@ const AdminDashboard = () => {
     description: '',
     is_featured: false
   });
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchMenu();
-      fetchCategories();
-      fetchSiteSettings();
-      fetchOrders();
-    }
-  }, [isAuthenticated]);
 
   const fetchSiteSettings = async () => {
     const { data: settings } = await supabase.from('site_settings').select('*').single();
@@ -83,6 +75,51 @@ const AdminDashboard = () => {
         is_featured: item.is_featured || false
       }));
       setMenuItems(formattedData);
+    }
+  };
+
+  const fetchOrders = async () => {
+    try {
+      setIsFetchingOrders(true);
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          order_items (*)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setOrders(data || []);
+    } catch (error) {
+      console.error('Error fetching orders:', error.message);
+    } finally {
+      setIsFetchingOrders(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchMenu();
+      fetchCategories();
+      fetchSiteSettings();
+      fetchOrders();
+    }
+  }, [isAuthenticated]);
+
+  const updateOrderStatus = async (orderId, newStatus) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: newStatus })
+        .eq('id', orderId);
+
+      if (error) throw error;
+      
+      // Update local state for immediate feedback
+      setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+    } catch (error) {
+      alert("Error updating status: " + error.message);
     }
   };
 
@@ -158,6 +195,7 @@ const AdminDashboard = () => {
       logo_url: siteSettings.logo_url,
       hero_title: siteSettings.hero_title,
       hero_subtitle: siteSettings.hero_subtitle,
+      hero_description: siteSettings.hero_description,
       fb_url: siteSettings.fb_url,
       ig_url: siteSettings.ig_url,
       tiktok_url: siteSettings.tiktok_url,
@@ -550,9 +588,50 @@ const AdminDashboard = () => {
                className="site-settings-container"
              >
                 <div className="settings-grid">
-                  {/* Hero Slideshow Settings */}
-                  <div className="settings-card">
-                    <h3>Hero Slideshow (4 Images)</h3>
+                  {/* Hero Section Settings */}
+                  <form onSubmit={handleUpdateSiteSettings} className="settings-card">
+                    <div className="section-header-inline">
+                      <h3>Hero Section Management</h3>
+                      <button type="submit" className="save-settings-btn min-save" disabled={isSavingSettings}>
+                        {isSavingSettings ? 'Saving...' : 'Save Hero Text'}
+                      </button>
+                    </div>
+
+                    <div className="settings-form-grid hero-text-inputs">
+                      <div className="form-group">
+                        <label>Hero Title</label>
+                        <input 
+                          type="text" 
+                          placeholder="Main Heading"
+                          value={siteSettings.hero_title} 
+                          onChange={e => setSiteSettings({...siteSettings, hero_title: e.target.value})}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>Hero Subtitle</label>
+                        <input 
+                          type="text" 
+                          placeholder="Small Heading Above Title"
+                          value={siteSettings.hero_subtitle} 
+                          onChange={e => setSiteSettings({...siteSettings, hero_subtitle: e.target.value})}
+                        />
+                      </div>
+                      <div className="form-group full-width">
+                        <label>Hero Description</label>
+                        <textarea 
+                          rows="2"
+                          placeholder="Short description under the title..."
+                          value={siteSettings.hero_description || ''} 
+                          onChange={e => setSiteSettings({...siteSettings, hero_description: e.target.value})}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="slideshow-header">
+                      <h4>Background Slideshow (4 Images)</h4>
+                      <p className="helper-text">Images auto-save on upload</p>
+                    </div>
+
                     <div className="slides-list">
                       {heroSlides.slice(0, 4).map((slide, idx) => (
                         <div key={slide.id} className="slide-edit-row">
@@ -560,7 +639,7 @@ const AdminDashboard = () => {
                             <img src={slide.image_url} alt={`Slide ${idx + 1}`} />
                           </div>
                           <div className="slide-input">
-                            <label>Slide {idx + 1} URL</label>
+                            <label>Slide {idx + 1}</label>
                             <div className="input-with-action">
                               <label className="upload-label">
                                 <input 
@@ -590,7 +669,7 @@ const AdminDashboard = () => {
                         </div>
                       ))}
                     </div>
-                  </div>
+                  </form>
 
                   {/* General Settings */}
                   <form onSubmit={handleUpdateSiteSettings} className="settings-card">
@@ -628,22 +707,6 @@ const AdminDashboard = () => {
                             </div>
                           </label>
                         </div>
-                      </div>
-                      <div className="form-group">
-                        <label>Hero Title</label>
-                        <input 
-                          type="text" 
-                          value={siteSettings.hero_title} 
-                          onChange={e => setSiteSettings({...siteSettings, hero_title: e.target.value})}
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label>Hero Subtitle</label>
-                        <input 
-                          type="text" 
-                          value={siteSettings.hero_subtitle} 
-                          onChange={e => setSiteSettings({...siteSettings, hero_subtitle: e.target.value})}
-                        />
                       </div>
                     </div>
 
@@ -1201,6 +1264,78 @@ const AdminDashboard = () => {
           align-items: center;
           gap: 15px;
         }
+
+        /* Slide Management Horizontal Layout */
+        .slides-list {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 20px;
+          margin-top: 10px;
+        }
+        .slide-edit-row {
+          background: #f8fafc;
+          padding: 20px;
+          border-radius: 16px;
+          border: 1px solid #e5e7eb;
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+          transition: var(--transition);
+        }
+        .slide-edit-row:hover {
+          border-color: var(--street-orange);
+          box-shadow: var(--shadow-sm);
+        }
+        .slide-preview {
+          width: 100%;
+          height: 120px;
+          border-radius: 10px;
+          overflow: hidden;
+          background: #e2e8f0;
+        }
+        .slide-input label {
+          font-size: 0.75rem;
+          color: #64748b;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 8px;
+        }
+        .input-with-action {
+          display: flex;
+          justify-content: center;
+        }
+        .min-btn {
+          width: 100% !important;
+          height: 40px !important;
+          border-radius: 8px !important;
+        }
+
+        .section-header-inline {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 25px;
+        }
+        .section-header-inline h3 { margin-bottom: 0 !important; }
+        .min-save { 
+          width: auto !important; 
+          padding: 8px 16px !important; 
+          font-size: 0.8rem !important;
+          margin-top: 0 !important;
+        }
+        .hero-text-inputs {
+          margin-bottom: 30px;
+          padding-bottom: 30px;
+          border-bottom: 1px dashed #e2e8f0;
+        }
+        .slideshow-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 15px;
+        }
+        .slideshow-header h4 { font-size: 0.9rem; color: var(--street-black); font-weight: 700; }
+        .helper-text { font-size: 0.75rem; color: #94a3b8; font-style: italic; }
 
         @keyframes pulse {
           0% { opacity: 0.5; }

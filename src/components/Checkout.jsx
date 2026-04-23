@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Phone, ShoppingBag, CheckCircle, CreditCard, Copy } from 'lucide-react';
+import { ArrowLeft, User, Phone, ShoppingBag, CheckCircle, CreditCard, Copy, Download } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { supabase } from '../lib/supabase';
 
@@ -21,8 +21,32 @@ const Checkout = () => {
     }
   }, [cart, orderSuccess, navigate]);
 
+  const handleDownloadReceipt = (name, phone, items, total) => {
+    const itemsText = items.map(item => `${item.quantity}x ${item.name} - ₱${(item.price * item.quantity).toFixed(2)}`).join('\n');
+    const content = `🍣 STREET SUSHI RECEIPT\n` +
+                    `--------------------------\n` +
+                    `Date: ${new Date().toLocaleString()}\n` +
+                    `Customer: ${name}\n` +
+                    `Phone: ${phone || 'N/A'}\n\n` +
+                    `Order Items:\n${itemsText}\n` +
+                    `--------------------------\n` +
+                    `TOTAL AMOUNT: ₱${total.toFixed(2)}\n\n` +
+                    `Please show this to the counter.\n` +
+                    `Thank you for your order!`;
+
+    const element = document.createElement("a");
+    const file = new Blob([content], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = `street-sushi-reciept-${Date.now()}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
   const handleCopy = (e) => {
     if (e) e.preventDefault();
+    if (!customerDetails.name) return; // Prevent copying if name is empty
+    
     const items = orderSuccess ? placedOrderItems : cart;
     const itemsText = items.map(item => `${item.quantity}x ${item.name} - ₱${(item.price * item.quantity).toFixed(2)}`).join('\n');
     const name = orderSuccess ? customerDetails.name : (customerDetails.name || 'Guest');
@@ -74,10 +98,8 @@ const Checkout = () => {
       if (itemsError) throw itemsError;
 
       setOrderSuccess(true);
+      handleDownloadReceipt(customerDetails.name, customerDetails.phone, [...cart], cartTotal);
       clearCart();
-      // Redirect to Facebook immediately as requested by removing the confirmation middle-screen
-      window.open('https://www.facebook.com/profile.php?id=61564958380863&sk=about', '_blank');
-      navigate('/');
     } catch (err) {
       alert('Error processing order: ' + err.message);
     } finally {
@@ -96,7 +118,26 @@ const Checkout = () => {
           <h1>Complete Your <span>Order</span></h1>
         </header>
 
-        <div className="checkout-grid">
+        {orderSuccess ? (
+          <motion.div 
+            className="order-success-view glass"
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+          >
+            <div className="success-icon-wrapper">
+              <CheckCircle size={80} color="#10b981" />
+            </div>
+            <h2>Order <span>Confirmed!</span></h2>
+            <p>Your receipt has been downloaded successfully. Please show it to the nearest Street Sushi Resto to complete your payment and collect your perfect sushi!</p>
+            
+            <div className="success-actions">
+              <button className="back-home-btn" onClick={() => navigate('/')}>
+                Return to Menu
+              </button>
+            </div>
+          </motion.div>
+        ) : (
+          <div className="checkout-grid">
           <div className="checkout-main">
             <motion.form 
               className="details-form glass"
@@ -154,34 +195,6 @@ const Checkout = () => {
                     </div>
                   </div>
                 </div>
-
-                {/* Visible Copy Preview */}
-                <div className="order-copy-preview glass">
-                  <div className="preview-header">
-                    <h4>Visible Order Details</h4>
-                    <span className="preview-hint">What your clipboard will contain</span>
-                  </div>
-                  <div className="preview-box">
-                    <pre>
-{`🍣 Street Sushi Order
-------------------
-Customer: ${customerDetails.name || '...'}
-Phone: ${customerDetails.phone || 'N/A'}
-
-Items:
-${cart.map(item => `${item.quantity}x ${item.name} - ₱${(item.price * item.quantity).toFixed(2)}`).join('\n')}
-------------------
-Total: ₱${cartTotal.toFixed(2)}`}
-                    </pre>
-                  </div>
-                  <button 
-                    type="button"
-                    className={`main-copy-btn ${isCopied ? 'copied' : ''}`}
-                    onClick={handleCopy}
-                  >
-                    {isCopied ? 'Details Copied!' : 'Copy Formatted Details'}
-                  </button>
-                </div>
               </div>
 
               <button 
@@ -189,7 +202,7 @@ Total: ₱${cartTotal.toFixed(2)}`}
                 className={`submit-order-btn ${isSubmitting ? 'loading' : ''}`}
                 disabled={isSubmitting || !customerDetails.name}
               >
-                {isSubmitting ? 'Processing Your Sushi...' : 'Confirm & Place Order'}
+                {isSubmitting ? 'Processing Your Sushi...' : 'Download Order'}
               </button>
             </motion.form>
           </div>
@@ -227,6 +240,7 @@ Total: ₱${cartTotal.toFixed(2)}`}
             </div>
           </aside>
         </div>
+        )}
       </div>
 
       <style jsx="true">{`
@@ -488,6 +502,12 @@ Total: ₱${cartTotal.toFixed(2)}`}
         .main-copy-btn.copied {
           background: #10b981;
         }
+        .main-copy-btn:disabled {
+          background: #cbd5e1;
+          cursor: not-allowed;
+          transform: none !important;
+          opacity: 0.7;
+        }
         .submit-order-btn {
           width: 100%;
           background: var(--street-orange);
@@ -507,6 +527,67 @@ Total: ₱${cartTotal.toFixed(2)}`}
           transform: translateY(-3px);
           box-shadow: 0 15px 30px rgba(0,0,0,0.15);
         }
+
+        /* Success View */
+        .order-success-view {
+          background: white;
+          padding: 60px;
+          border-radius: 40px;
+          text-align: center;
+          max-width: 700px;
+          margin: 0 auto;
+          box-shadow: var(--shadow-lg);
+        }
+        .success-icon-wrapper {
+          margin-bottom: 30px;
+          display: flex;
+          justify-content: center;
+        }
+        .order-success-view h2 {
+          font-family: var(--font-brush);
+          font-size: 3rem;
+          color: var(--street-black);
+          margin-bottom: 20px;
+        }
+        .order-success-view h2 span { color: #10b981; }
+        .order-success-view p {
+          font-size: 1.1rem;
+          color: var(--muted-gray);
+          margin-bottom: 40px;
+          line-height: 1.6;
+        }
+        .success-actions {
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+          max-width: 400px;
+          margin: 0 auto;
+        }
+        .download-btn-big {
+          background: #10b981;
+          color: white;
+          padding: 18px;
+          border-radius: 14px;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          transition: var(--transition);
+          text-transform: uppercase;
+        }
+        .download-btn-big:hover {
+          background: #059669;
+          transform: translateY(-2px);
+          box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+        }
+        .back-home-btn {
+          padding: 15px;
+          color: var(--muted-gray);
+          font-weight: 600;
+          transition: var(--transition);
+        }
+        .back-home-btn:hover { color: var(--street-orange); }
 
         .submit-order-btn:disabled {
           opacity: 0.5;

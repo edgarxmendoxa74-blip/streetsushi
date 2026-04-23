@@ -4,18 +4,20 @@ import { supabase } from '../lib/supabase';
 const Hero = () => {
   const [settings, setSettings] = useState({
     title: 'Artistry in Every Bite',
-    subtitle: 'Premium Japanese Cuisine'
+    subtitle: 'Premium Japanese Cuisine',
+    description: 'Experience the soul of Tokyo street sushi with the freshest cuts and master-crafted recipes.'
   });
   const [slides, setSlides] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: settingsData } = await supabase.from('site_settings').select('hero_title, hero_subtitle').single();
+      const { data: settingsData } = await supabase.from('site_settings').select('hero_title, hero_subtitle, hero_description').single();
       if (settingsData) {
         setSettings({
           title: settingsData.hero_title,
-          subtitle: settingsData.hero_subtitle
+          subtitle: settingsData.hero_subtitle,
+          description: settingsData.hero_description || 'Experience the soul of Tokyo street sushi with the freshest cuts and master-crafted recipes.'
         });
       }
 
@@ -59,7 +61,7 @@ const Hero = () => {
           <span className="subtitle-brand">{settings.subtitle}</span>
           <h1 className="hero-title">{settings.title}</h1>
           <div className="hero-divider"></div>
-          <p className="hero-desc">Experience the soul of Tokyo street sushi with the freshest cuts and master-crafted recipes.</p>
+          <p className="hero-desc">{settings.description}</p>
         </div>
       </div>
 

@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS site_settings (
     logo_url TEXT DEFAULT '/logo.png',
     hero_title TEXT DEFAULT 'Artistry in Every Bite',
     hero_subtitle TEXT DEFAULT 'Premium Japanese Cuisine',
+    hero_description TEXT DEFAULT 'Experience the soul of Tokyo street sushi with the freshest cuts and master-crafted recipes.',
     fb_url TEXT DEFAULT '',
     ig_url TEXT DEFAULT '',
     tiktok_url TEXT DEFAULT '',
