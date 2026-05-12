@@ -7,12 +7,14 @@ import { useNavigate } from 'react-router-dom';
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   const [activeTab, setActiveTab] = useState('menu');
   const [menuItems, setMenuItems] = useState([]);
+  const [adminSearchQuery, setAdminSearchQuery] = useState('');
   const [categoriesList, setCategoriesList] = useState([]);
   
   // Site Settings State
@@ -104,6 +106,22 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+      setIsLoading(false);
+    };
+
+    checkSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
     if (isAuthenticated) {
       fetchMenu();
       fetchCategories();
@@ -191,6 +209,14 @@ const AdminDashboard = () => {
         alert("Error deleting item.");
       }
     }
+  };
+
+  const autoSaveLogo = async (url) => {
+    const { error } = await supabase.from('site_settings').update({
+      logo_url: url
+    }).eq('id', 1);
+    
+    if (error) console.error("Error auto-saving logo:", error.message);
   };
 
   const handleUpdateSiteSettings = async (e) => {
@@ -294,15 +320,28 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (username === 'admin' && password === 'sushi2026') {
-      setIsAuthenticated(true);
-      setLoginError('');
-    } else {
-      setLoginError('Invalid username or password.');
+    setLoginError('');
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
+      if (error) throw error;
+    } catch (error) {
+      setLoginError(error.message);
     }
   };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setIsAuthenticated(false);
+  };
+
+  if (isLoading) {
+    return <div className="login-container">Loading...</div>;
+  }
 
   if (!isAuthenticated) {
     return (
@@ -317,12 +356,12 @@ const AdminDashboard = () => {
           </div>
           <form onSubmit={handleLogin} className="login-form">
             <div className="input-group">
-              <label>Username</label>
+              <label>Email Address</label>
               <input 
-                type="text" 
-                value={username} 
-                onChange={(e) => setUsername(e.target.value)} 
-                placeholder="Enter username" 
+                type="email" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                placeholder="admin@streetsushi.com" 
               />
             </div>
             <div className="input-group">
@@ -479,6 +518,23 @@ const AdminDashboard = () => {
           <button className="back-btn" onClick={() => navigate('/')}>
             <ArrowLeft size={18} /> Back to Site
           </button>
+          <button className="logout-btn" onClick={handleLogout} style={{
+            marginTop: '10px',
+            width: '100%',
+            padding: '12px',
+            borderRadius: '12px',
+            background: 'rgba(239, 68, 68, 0.1)',
+            color: '#ef4444',
+            fontWeight: '700',
+            textAlign: 'left',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            border: 'none',
+            cursor: 'pointer'
+          }}>
+             Logout
+          </button>
         </div>
       </aside>
 
@@ -507,7 +563,13 @@ const AdminDashboard = () => {
               className="menu-manager"
             >
               <div className="manager-toolbar">
-                <input type="text" placeholder="Search menu items..." className="admin-search" />
+                <input 
+                  type="text" 
+                  placeholder="Search menu items..." 
+                  className="admin-search" 
+                  value={adminSearchQuery}
+                  onChange={(e) => setAdminSearchQuery(e.target.value)}
+                />
                 <button className="add-item-btn" onClick={handleAddNew}>
                   <Plus size={18} /> Add New Item
                 </button>
@@ -525,7 +587,10 @@ const AdminDashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {menuItems.map(item => (
+                    {menuItems.filter(item => 
+                      item.name.toLowerCase().includes(adminSearchQuery.toLowerCase()) ||
+                      item.category.toLowerCase().includes(adminSearchQuery.toLowerCase())
+                    ).map(item => (
                       <tr key={item.id}>
                         <td className="item-cell">
                           <img src={item.image} alt={item.name} className="item-thumb" />
@@ -787,7 +852,13 @@ const AdminDashboard = () => {
                                <ImageIcon size={20} />
                              </div>
                           )}
-                        </div>
+                          </div>
+                          <input 
+                            type="text" 
+                            placeholder="Logo URL..."
+                            value={siteSettings.logo_url || ''} 
+                            onChange={e => setSiteSettings({...siteSettings, logo_url: e.target.value})} 
+                          />
                           <label className="upload-label">
                             <input 
                               type="file" 
@@ -797,7 +868,10 @@ const AdminDashboard = () => {
                                 const file = e.target.files[0];
                                 if (file) {
                                   const url = await handleFileUpload(file, 'logo');
-                                  if (url) setSiteSettings({...siteSettings, logo_url: url});
+                                  if (url) {
+                                    setSiteSettings({...siteSettings, logo_url: url});
+                                    autoSaveLogo(url); // Auto-save logo for better UX
+                                  }
                                 }
                               }}
                             />
@@ -918,7 +992,21 @@ const AdminDashboard = () => {
                   </div>
                 </div>
                 <div className="form-group">
+                  <label>Item Preview</label>
+                  <div className="item-image-preview">
+                    {formData.image_url ? (
+                      <img src={formData.image_url} alt="Preview" />
+                    ) : (
+                      <div className="empty-preview">
+                        <ImageIcon size={32} />
+                        <span>No image selected</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="form-group">
                   <label>Item Image</label>
+
                   <div className="input-with-upload">
                     <input 
                       type="text" 
@@ -1465,6 +1553,36 @@ const AdminDashboard = () => {
         }
         .slideshow-header h4 { font-size: 0.9rem; color: var(--street-black); font-weight: 700; }
         .helper-text { font-size: 0.75rem; color: #94a3b8; font-style: italic; }
+
+        /* Item Modal Image Preview */
+        .item-image-preview {
+          width: 100%;
+          height: 180px;
+          border-radius: 16px;
+          overflow: hidden;
+          background: #f1f5f9;
+          border: 2px dashed #e2e8f0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 5px;
+        }
+        .item-image-preview img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .empty-preview {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+          color: #94a3b8;
+        }
+        .empty-preview span {
+          font-size: 0.8rem;
+          font-weight: 600;
+        }
 
         @keyframes pulse {
           0% { opacity: 0.5; }

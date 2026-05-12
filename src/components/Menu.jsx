@@ -64,9 +64,9 @@ const Menu = () => {
 
   const filteredItems = menuItems.filter(item => {
     const matchesCategory = activeCategory === "All" || item.category === activeCategory;
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          item.ingredients.some(ing => ing.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesSearch = (item.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          item.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          item.ingredients?.some(ing => ing?.toLowerCase().includes(searchQuery.toLowerCase()))) ?? false;
     return matchesCategory && matchesSearch;
   });
 

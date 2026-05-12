@@ -21,6 +21,23 @@ const Navbar = () => {
       }
     };
     fetchData();
+
+    // Set up real-time subscription for site settings
+    const subscription = supabase
+      .channel('site_settings_changes')
+      .on('postgres_changes', { 
+        event: 'UPDATE', 
+        schema: 'public', 
+        table: 'site_settings' 
+      }, payload => {
+        if (payload.new.logo_url) setLogo(payload.new.logo_url);
+        setContactInfo(payload.new);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
   }, []);
 
   return (
