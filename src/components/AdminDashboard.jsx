@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingBag, Settings, Plus, Edit, Trash2, ArrowLeft, Image as ImageIcon, Check, Upload, ClipboardList, Info } from 'lucide-react';
+import { ShoppingBag, Settings, Plus, Edit, Trash2, ArrowLeft, Image as ImageIcon, Check, Upload, ClipboardList, Info, Tags } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 
@@ -44,6 +44,11 @@ const AdminDashboard = () => {
     description: '',
     is_featured: false
   });
+
+  // Category Modal State
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [categoryName, setCategoryName] = useState('');
 
   const fetchSiteSettings = async () => {
     const { data: settings } = await supabase.from('site_settings').select('*').single();
@@ -206,6 +211,52 @@ const AdminDashboard = () => {
     if (error) alert("Error updating settings: " + error.message);
     else alert("Site settings updated successfully!");
     setIsSavingSettings(false);
+  };
+
+  const handleEditCategory = (cat) => {
+    setEditingCategory(cat);
+    setCategoryName(cat.name);
+    setIsCategoryModalOpen(true);
+  };
+
+  const handleAddNewCategory = () => {
+    setEditingCategory(null);
+    setCategoryName('');
+    setIsCategoryModalOpen(true);
+  };
+
+  const handleSaveCategory = async (e) => {
+    e.preventDefault();
+    if (!categoryName.trim()) return;
+
+    let error;
+    if (editingCategory) {
+      const { error: err } = await supabase.from('categories').update({ name: categoryName }).eq('id', editingCategory.id);
+      error = err;
+    } else {
+      const { error: err } = await supabase.from('categories').insert([{ name: categoryName }]);
+      error = err;
+    }
+
+    if (!error) {
+      setIsCategoryModalOpen(false);
+      fetchCategories();
+      fetchMenu(); // In case name change affects menu display
+    } else {
+      alert("Error saving category: " + error.message);
+    }
+  };
+
+  const handleDeleteCategory = async (id) => {
+    if (window.confirm("Are you sure you want to delete this category? Items in this category might be affected (ensure they are re-categorized or the database handles cascade).")) {
+      const { error } = await supabase.from('categories').delete().eq('id', id);
+      if (!error) {
+        fetchCategories();
+        fetchMenu();
+      } else {
+        alert("Error deleting category. It might be in use.");
+      }
+    }
   };
 
   const handleUpdateSlide = async (id, url) => {
@@ -416,6 +467,9 @@ const AdminDashboard = () => {
           <button className={`nav-btn ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}>
             <ClipboardList size={20} /> Orders
           </button>
+          <button className={`nav-btn ${activeTab === 'categories' ? 'active' : ''}`} onClick={() => setActiveTab('categories')}>
+            <Tags size={20} /> Categories
+          </button>
           <button className={`nav-btn ${activeTab === 'site-settings' ? 'active' : ''}`} onClick={() => setActiveTab('site-settings')}>
             <ImageIcon size={20} /> Site Branding
           </button>
@@ -434,6 +488,7 @@ const AdminDashboard = () => {
           <h2>
             {activeTab === 'menu' ? 'Menu Management' : 
              activeTab === 'orders' ? 'Orders Management' :
+             activeTab === 'categories' ? 'Categories Management' :
              activeTab === 'site-settings' ? 'Site Branding' : 
              'Settings'}
           </h2>
@@ -571,6 +626,50 @@ const AdminDashboard = () => {
                         <td>
                           <button className="action-btn info" onClick={() => alert(`Full Order ID: ${order.id}\nCustomer: ${order.customer_name}`)}>
                             <Info size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </motion.div>
+          )}
+
+          {activeTab === 'categories' && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="categories-manager"
+            >
+              <div className="manager-toolbar">
+                <div className="orders-stats">
+                  <div className="stat-item">
+                    <span className="stat-label">Total Categories</span>
+                    <span className="stat-value">{categoriesList.length}</span>
+                  </div>
+                </div>
+                <button className="add-item-btn" onClick={handleAddNewCategory}>
+                  <Plus size={18} /> Add Category
+                </button>
+              </div>
+
+              <div className="table-container">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Category Name</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {categoriesList.map(cat => (
+                      <tr key={cat.id}>
+                        <td><strong>{cat.name}</strong></td>
+                        <td className="actions-cell">
+                          <button className="action-btn edit" onClick={() => handleEditCategory(cat)}><Edit size={16} /></button>
+                          <button className="action-btn delete" onClick={() => handleDeleteCategory(cat.id)}>
+                            <Trash2 size={16} />
                           </button>
                         </td>
                       </tr>
@@ -874,6 +973,36 @@ const AdminDashboard = () => {
                 <div className="modal-actions">
                   <button type="button" onClick={() => setIsModalOpen(false)} className="cancel-btn">Cancel</button>
                   <button type="submit" className="save-btn">Save Item</button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Modal for Categories */}
+        {isCategoryModalOpen && (
+          <div className="modal-overlay">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="modal-form-container"
+              style={{ maxWidth: '400px' }}
+            >
+              <h3>{editingCategory ? 'Edit Category' : 'Add New Category'}</h3>
+              <form onSubmit={handleSaveCategory} className="item-form">
+                <div className="form-group">
+                  <label>Category Name</label>
+                  <input 
+                    required
+                    type="text" 
+                    value={categoryName} 
+                    onChange={e => setCategoryName(e.target.value)} 
+                    placeholder="e.g. Sushi Rolls"
+                  />
+                </div>
+                <div className="modal-actions">
+                  <button type="button" onClick={() => setIsCategoryModalOpen(false)} className="cancel-btn">Cancel</button>
+                  <button type="submit" className="save-btn">Save</button>
                 </div>
               </form>
             </motion.div>
