@@ -180,6 +180,12 @@ const Checkout = () => {
           console.error('Item missing ID:', item);
           throw new Error(`Item "${item.name}" is missing required information`);
         }
+        console.log('Adding order item:', {
+          menu_item_id: item.id,
+          item_name: item.name,
+          quantity: item.quantity,
+          price: item.price
+        });
         return {
           order_id: order.id,
           menu_item_id: item.id,
@@ -189,12 +195,15 @@ const Checkout = () => {
         };
       });
 
+      console.log('Order items to insert:', orderItems);
+
       const { error: itemsError } = await supabase
         .from('order_items')
         .insert(orderItems);
       
       if (itemsError) {
         console.error('Order items error:', itemsError);
+        console.error('Failed order items:', orderItems);
         throw new Error(`Failed to add items to order: ${itemsError.message}`);
       }
 
@@ -268,6 +277,18 @@ const Checkout = () => {
                   ))}
                   
                   <div className="receipt-divider-preview"></div>
+                  
+                  {customerDetails.specialRequest && (
+                    <>
+                      <div className="receipt-line">
+                        <span style={{ fontWeight: 'bold' }}>Special Request:</span>
+                      </div>
+                      <div className="receipt-line" style={{ marginLeft: '10px', fontSize: '0.9em', color: '#666' }}>
+                        <span>{customerDetails.specialRequest}</span>
+                      </div>
+                      <div className="receipt-divider-preview"></div>
+                    </>
+                  )}
                   
                   <div className="receipt-total-line">
                     <span>TOTAL: ₱{cartTotal.toFixed(2)}</span>
