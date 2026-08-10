@@ -12,6 +12,7 @@ const Checkout = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [placedOrderItems, setPlacedOrderItems] = useState([]);
+  const [placedOrderTotal, setPlacedOrderTotal] = useState(0);
   const [placedOrderRef, setPlacedOrderRef] = useState('');
   const [showReceiptPreview, setShowReceiptPreview] = useState(false);
 
@@ -143,8 +144,9 @@ const Checkout = () => {
     if (!customerDetails.name) return;
     
     setIsSubmitting(true);
-    // Capture cart items for the summary/copy before clearing
+    // Capture cart items and total for the summary/copy before clearing
     setPlacedOrderItems([...cart]);
+    setPlacedOrderTotal(cartTotal);
 
     try {
       // Validate cart has items
@@ -292,7 +294,7 @@ const Checkout = () => {
                   
                   <div className="receipt-total-line">
                     <span>TOTAL:</span>
-                    <span>₱{cartTotal.toFixed(2)}</span>
+                    <span>₱{placedOrderTotal.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -301,7 +303,7 @@ const Checkout = () => {
             <p>Your order has been successfully submitted! The receipt is displayed above with your order reference number <strong>#{placedOrderRef}</strong>. You can optionally download the receipt file to show to our counter staff, or simply show this screen to complete your payment and collect your fresh sushi order.</p>
             
             <div className="success-actions">
-              <button className="download-receipt-btn" onClick={() => handleDownloadReceipt(customerDetails.name, customerDetails.phone, placedOrderItems, cartTotal, customerDetails.specialRequest, placedOrderRef)}>
+              <button className="download-receipt-btn" onClick={() => handleDownloadReceipt(customerDetails.name, customerDetails.phone, placedOrderItems, placedOrderTotal, customerDetails.specialRequest, placedOrderRef)}>
                 📥 Download Order Receipt
               </button>
               <button className="back-home-btn" onClick={() => navigate('/')}>
@@ -488,7 +490,7 @@ const Checkout = () => {
                   
                   <div className="receipt-total">
                     <span>TOTAL AMOUNT:</span>
-                    <span>₱{cartTotal.toFixed(2)}</span>
+                    <span>₱{(orderSuccess ? placedOrderTotal : cartTotal).toFixed(2)}</span>
                   </div>
 
                   <div className="receipt-footer">
@@ -501,7 +503,7 @@ const Checkout = () => {
             
             <div className="receipt-modal-actions">
               <button className="download-from-modal" onClick={() => {
-                handleDownloadReceipt(customerDetails.name, customerDetails.phone, orderSuccess ? placedOrderItems : cart, cartTotal, customerDetails.specialRequest, placedOrderRef);
+                handleDownloadReceipt(customerDetails.name, customerDetails.phone, orderSuccess ? placedOrderItems : cart, orderSuccess ? placedOrderTotal : cartTotal, customerDetails.specialRequest, placedOrderRef);
                 setShowReceiptPreview(false);
               }}>
                 📥 Download as PNG
@@ -931,11 +933,12 @@ const Checkout = () => {
           justify-content: space-between;
           align-items: center;
           font-weight: bold;
-          font-size: 1rem;
+          font-size: 1.2rem;
           color: var(--street-orange);
-          margin-top: 10px;
-          padding-top: 8px;
+          margin-top: 12px;
+          padding: 10px 0;
           border-top: 2px solid #f0f0f0;
+          border-bottom: 2px solid var(--street-orange);
         }
         .success-actions {
           display: flex;
