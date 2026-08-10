@@ -37,70 +37,72 @@ const Footer = () => {
   return (
     <footer className="site-footer">
       <div className="footer-container">
-        
-        {/* Brand Section */}
-        <div className="footer-brand">
-          <div className="footer-logo-wrapper">
-            <img src={logo} alt="Street Sushi Logo" className="footer-logo" />
-            <h3>Street <span>Sushi</span></h3>
-          </div>
-          <p className="footer-tagline">Artistry in Every Bite. Fresh cuts, master-crafted recipes, and the true soul of Tokyo street sushi.</p>
-          <div className="footer-socials">
-            {contactInfo?.fb_url && (
-              <a href={contactInfo.fb_url} target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Facebook">
-                <FacebookIcon />
-              </a>
-            )}
-            {contactInfo?.ig_url && (
-              <a href={contactInfo.ig_url} target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Instagram">
-                <InstagramIcon />
-              </a>
-            )}
-            {contactInfo?.tiktok_url && (
-              <a href={contactInfo.tiktok_url} target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="TikTok">
-                <TikTokIcon />
-              </a>
-            )}
-          </div>
-        </div>
-
-        {/* Contact Info Section */}
-        <div className="footer-contact">
-          <h4>Contact Us</h4>
-          <div className="contact-list">
-            <div className="contact-item-row">
-              <div className="icon-circle"><Phone size={18} /></div>
-              <div>
-                <label>Call or Message</label>
-                <a href={`tel:${contactInfo?.contact_number}`} className="contact-link">
-                  {contactInfo?.contact_number || '+63 9XX XXX XXXX'}
+        <div className="footer-content-grid">
+          
+          {/* Brand Section */}
+          <div className="footer-brand">
+            <div className="footer-logo-wrapper">
+              <img src={logo} alt="Street Sushi Logo" className="footer-logo" />
+              <h3>Street <span>Sushi</span></h3>
+            </div>
+            <p className="footer-tagline">Artistry in Every Bite. Fresh cuts, master-crafted recipes, and the true soul of Tokyo street sushi.</p>
+            <div className="footer-socials">
+              {contactInfo?.fb_url && (
+                <a href={contactInfo.fb_url} target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Facebook">
+                  <FacebookIcon />
                 </a>
-              </div>
+              )}
+              {contactInfo?.ig_url && (
+                <a href={contactInfo.ig_url} target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Instagram">
+                  <InstagramIcon />
+                </a>
+              )}
+              {contactInfo?.tiktok_url && (
+                <a href={contactInfo.tiktok_url} target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="TikTok">
+                  <TikTokIcon />
+                </a>
+              )}
             </div>
-            <div className="contact-item-row">
-              <div className="icon-circle"><MapPin size={18} /></div>
-              <div>
-                <label>Find Us</label>
-                <span className="contact-text">{contactInfo?.location || '123 Street, City'}</span>
+          </div>
+
+          {/* Contact Info Section */}
+          <div className="footer-contact">
+            <h4>Contact Us</h4>
+            <div className="contact-list">
+              <div className="contact-item-row">
+                <div className="icon-circle"><Phone size={18} /></div>
+                <div>
+                  <label>Call or Message</label>
+                  <a href={`tel:${contactInfo?.contact_number}`} className="contact-link">
+                    {contactInfo?.contact_number || '+63 9XX XXX XXXX'}
+                  </a>
+                </div>
+              </div>
+              <div className="contact-item-row">
+                <div className="icon-circle"><MapPin size={18} /></div>
+                <div>
+                  <label>Find Us</label>
+                  <span className="contact-text">{contactInfo?.location || '123 Street, City'}</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Hours Section */}
-        <div className="footer-hours">
-          <h4>Opening Hours</h4>
-          <div className="hours-list">
-            <div className="contact-item-row">
-              <div className="icon-circle"><Clock size={18} /></div>
-              <div>
-                <p className="hours-text"><strong>Mon - Sat:</strong> 10:00 AM - 9:00 PM</p>
-                <p className="hours-text"><strong>Sunday:</strong> 11:00 AM - 8:00 PM</p>
+          {/* Hours Section */}
+          <div className="footer-hours">
+            <h4>Opening Hours</h4>
+            <div className="hours-list">
+              <div className="contact-item-row">
+                <div className="icon-circle"><Clock size={18} /></div>
+                <div>
+                  <p className="hours-text"><strong>Mon - Sat:</strong> 10:00 AM - 9:00 PM</p>
+                  <p className="hours-text"><strong>Sunday:</strong> 11:00 AM - 8:00 PM</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
+        </div>
       </div>
 
       <div className="footer-bottom">
@@ -120,10 +122,24 @@ const Footer = () => {
         .footer-container {
           max-width: 1400px;
           margin: 0 auto;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          gap: 60px;
+          margin-bottom: 50px;
+        }
+
+        .footer-content-grid {
           display: grid;
           grid-template-columns: 1.5fr 1fr 1fr;
           gap: 60px;
-          margin-bottom: 50px;
+          width: 100%;
+          max-width: 1200px;
+        }
+
+        .footer-brand {
+          text-align: center;
         }
 
         .footer-brand h3 {
@@ -140,6 +156,7 @@ const Footer = () => {
         .footer-logo-wrapper {
           display: flex;
           align-items: center;
+          justify-content: center;
           gap: 15px;
           margin-bottom: 20px;
         }
@@ -156,13 +173,34 @@ const Footer = () => {
           color: #9ca3af;
           font-size: 0.95rem;
           line-height: 1.6;
-          margin-bottom: 25px;
+          margin: 0 auto 25px;
           max-width: 400px;
         }
 
         .footer-socials {
           display: flex;
           gap: 12px;
+          justify-content: center;
+        }
+
+        .footer-contact,
+        .footer-hours {
+          text-align: center;
+        }
+
+        .contact-list,
+        .hours-list {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+          align-items: center;
+        }
+
+        .contact-item-row {
+          display: flex;
+          align-items: flex-start;
+          gap: 15px;
+          text-align: left;
         }
 
         .social-icon {
@@ -194,13 +232,17 @@ const Footer = () => {
           position: relative;
           padding-bottom: 10px;
           font-weight: 700;
+          display: flex;
+          justify-content: center;
+          align-items: center;
         }
 
         .site-footer h4::after {
           content: '';
           position: absolute;
-          left: 0;
           bottom: 0;
+          left: 50%;
+          transform: translateX(-50%);
           width: 30px;
           height: 2px;
           background: var(--street-orange);
@@ -210,12 +252,6 @@ const Footer = () => {
           display: flex;
           flex-direction: column;
           gap: 20px;
-        }
-
-        .contact-item-row {
-          display: flex;
-          align-items: flex-start;
-          gap: 15px;
         }
 
         .icon-circle {
@@ -280,12 +316,13 @@ const Footer = () => {
         }
 
         @media (max-width: 1024px) {
-          .footer-container {
+          .footer-content-grid {
             grid-template-columns: 1.2fr 1fr;
             gap: 40px;
           }
           .footer-hours {
             grid-column: span 2;
+            justify-self: center;
           }
         }
 
@@ -293,12 +330,23 @@ const Footer = () => {
           .site-footer {
             padding: 60px 5% 30px;
           }
-          .footer-container {
+          .footer-content-grid {
             grid-template-columns: 1fr;
             gap: 40px;
+            text-align: center;
           }
           .footer-hours {
             grid-column: span 1;
+          }
+          
+          .footer-brand,
+          .footer-contact,
+          .footer-hours {
+            text-align: center;
+          }
+          
+          .contact-item-row {
+            justify-content: center;
           }
         }
       `}</style>

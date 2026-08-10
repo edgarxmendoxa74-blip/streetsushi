@@ -147,41 +147,63 @@ const Checkout = () => {
     setPlacedOrderItems([...cart]);
 
     try {
+      // Validate cart has items
+      if (cart.length === 0) {
+        throw new Error('Your cart is empty');
+      }
+
+      // Validate all cart items have IDs
+      const invalidItems = cart.filter(item => !item.id);
+      if (invalidItems.length > 0) {
+        throw new Error('Some items in your cart are missing information. Please refresh and try again.');
+      }
+
       // 1. Insert order
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert([{
           customer_name: customerDetails.name,
-          customer_phone: customerDetails.phone,
+          customer_phone: customerDetails.phone || null,
           total_price: cartTotal,
           order_type: 'walk-in',
-          special_request: customerDetails.specialRequest
+          special_request: customerDetails.specialRequest || null
         }])
         .select()
         .single();
       
       if (orderError) throw orderError;
+      if (!order) throw new Error('Failed to create order');
 
-      // 2. Insert order items
-      const orderItems = cart.map(item => ({
-        order_id: order.id,
-        menu_item_id: item.id,
-        quantity: item.quantity,
-        price_at_time: item.price,
-        item_name: item.name
-      }));
+      // 2. Insert order items with validation
+      const orderItems = cart.map(item => {
+        if (!item.id) {
+          console.error('Item missing ID:', item);
+          throw new Error(`Item "${item.name}" is missing required information`);
+        }
+        return {
+          order_id: order.id,
+          menu_item_id: item.id,
+          quantity: item.quantity,
+          price_at_time: item.price,
+          item_name: item.name
+        };
+      });
 
       const { error: itemsError } = await supabase
         .from('order_items')
         .insert(orderItems);
       
-      if (itemsError) throw itemsError;
+      if (itemsError) {
+        console.error('Order items error:', itemsError);
+        throw new Error(`Failed to add items to order: ${itemsError.message}`);
+      }
 
       // Store the order reference number (first 8 characters of UUID)
       setPlacedOrderRef(order.id.slice(0, 8));
       setOrderSuccess(true);
       clearCart();
     } catch (err) {
+      console.error('Order error:', err);
       alert('Error processing order: ' + err.message);
     } finally {
       setIsSubmitting(false);

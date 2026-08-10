@@ -11,6 +11,7 @@ const Navbar = () => {
   const [contactInfo, setContactInfo] = useState(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [isAutoScrolling, setIsAutoScrolling] = useState(false);
   const catScrollRef = useRef(null);
 
   const { cart, cartCount, cartTotal, removeFromCart, updateQuantity, isCartOpen, setIsCartOpen, toggleCart, clearCart, searchQuery, setSearchQuery, activeCategory, setActiveCategory, categories } = useCart();
@@ -24,8 +25,36 @@ const Navbar = () => {
   };
 
   const scrollCats = (direction) => {
-    if (catScrollRef.current) {
-      catScrollRef.current.scrollBy({ left: direction === 'left' ? -200 : 200, behavior: 'smooth' });
+    if (catScrollRef.current && !isAutoScrolling) {
+      setIsAutoScrolling(true);
+      const scrollAmount = direction === 'left' ? -250 : 250;
+      catScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      
+      // Reset auto-scrolling flag after animation completes
+      setTimeout(() => setIsAutoScrolling(false), 300);
+    }
+  };
+
+  // Auto-scroll to active category
+  const scrollToActiveCategory = () => {
+    if (catScrollRef.current && activeCategory && !isAutoScrolling) {
+      const container = catScrollRef.current;
+      const activeButton = container.querySelector('.cat-pill.active');
+      
+      if (activeButton) {
+        const containerRect = container.getBoundingClientRect();
+        const buttonRect = activeButton.getBoundingClientRect();
+        const scrollLeft = container.scrollLeft;
+        
+        // Calculate if button is visible
+        const isVisible = buttonRect.left >= containerRect.left && 
+                         buttonRect.right <= containerRect.right;
+        
+        if (!isVisible) {
+          const targetScroll = activeButton.offsetLeft - (container.clientWidth / 2) + (activeButton.clientWidth / 2);
+          container.scrollTo({ left: targetScroll, behavior: 'smooth' });
+        }
+      }
     }
   };
 
