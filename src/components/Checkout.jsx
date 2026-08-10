@@ -347,7 +347,7 @@ const Checkout = () => {
                   
                   <div className="receipt-total-line">
                     <span>TOTAL:</span>
-                    <span>₱{placedOrderTotal.toFixed(2)}</span>
+                    <span>₱{(placedOrderTotal || (placedOrderItems.length > 0 ? placedOrderItems : cart).reduce((sum, item) => sum + (item.price * item.quantity), 0)).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -356,7 +356,10 @@ const Checkout = () => {
             <p>Your order has been successfully submitted! The receipt is displayed above with your order reference number <strong>#{placedOrderRef}</strong>. You can optionally download the receipt file to show to our counter staff, or simply show this screen to complete your payment and collect your fresh sushi order.</p>
             
             <div className="success-actions">
-              <button className="download-receipt-btn" onClick={() => handleDownloadReceipt(customerDetails.name, customerDetails.phone, placedOrderItems, placedOrderTotal, customerDetails.specialRequest, placedOrderRef)}>
+              <button className="download-receipt-btn" onClick={() => {
+                const finalTotal = placedOrderTotal || (placedOrderItems.length > 0 ? placedOrderItems : cart).reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                handleDownloadReceipt(customerDetails.name, customerDetails.phone, placedOrderItems, finalTotal, customerDetails.specialRequest, placedOrderRef);
+              }}>
                 📥 Download Order Receipt
               </button>
               <button className="back-home-btn" onClick={() => navigate('/')}>
@@ -546,7 +549,7 @@ const Checkout = () => {
                   
                   <div className="receipt-total">
                     <span>TOTAL AMOUNT:</span>
-                    <span>₱{(orderSuccess ? placedOrderTotal : cartTotal).toFixed(2)}</span>
+                    <span>₱{(orderSuccess ? (placedOrderTotal || (placedOrderItems.length > 0 ? placedOrderItems : cart).reduce((sum, item) => sum + (item.price * item.quantity), 0)) : cartTotal).toFixed(2)}</span>
                   </div>
 
                   <div className="receipt-footer">
@@ -559,7 +562,8 @@ const Checkout = () => {
             
             <div className="receipt-modal-actions">
               <button className="download-from-modal" onClick={() => {
-                handleDownloadReceipt(customerDetails.name, customerDetails.phone, orderSuccess ? placedOrderItems : cart, orderSuccess ? placedOrderTotal : cartTotal, customerDetails.specialRequest, placedOrderRef);
+                const finalTotal = orderSuccess ? (placedOrderTotal || (placedOrderItems.length > 0 ? placedOrderItems : cart).reduce((sum, item) => sum + (item.price * item.quantity), 0)) : cartTotal;
+                handleDownloadReceipt(customerDetails.name, customerDetails.phone, orderSuccess ? placedOrderItems : cart, finalTotal, customerDetails.specialRequest, placedOrderRef);
                 setShowReceiptPreview(false);
               }}>
                 📥 Download as PNG
