@@ -8,7 +8,6 @@ import { supabase } from '../lib/supabase';
 const Checkout = () => {
   const navigate = useNavigate();
   const { cart, cartTotal, clearCart } = useCart();
-  const [customerDetails, setCustomerDetails] = useState({ name: '', phone: '', specialRequest: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [placedOrderItems, setPlacedOrderItems] = useState([]);
@@ -23,11 +22,11 @@ const Checkout = () => {
     }
   }, [cart, orderSuccess, navigate]);
 
-  const handleDownloadReceipt = (name, phone, items, total, specialRequest, orderRefNumber = null) => {
+  const handleDownloadReceipt = (items, total, orderRefNumber = null) => {
     // Create a canvas to draw the receipt
     const canvas = document.createElement('canvas');
     canvas.width = 600;
-    canvas.height = 530 + (items.length * 30) + (specialRequest ? 40 : 0);
+    canvas.height = 450 + (items.length * 30);
     const ctx = canvas.getContext('2d');
 
     // Background
@@ -62,16 +61,6 @@ const Checkout = () => {
     // Date
     ctx.font = '14px Arial';
     ctx.fillText(`Date: ${new Date().toLocaleString()}`, 40, y);
-    y += 30;
-    
-    // Customer Details
-    ctx.font = 'bold 16px Arial';
-    ctx.fillText('Customer:', 40, y);
-    y += 25;
-    ctx.font = '14px Arial';
-    ctx.fillText(`Name: ${name}`, 40, y);
-    y += 25;
-    ctx.fillText(`Phone: ${phone || 'N/A'}`, 40, y);
     y += 35;
 
     // Items
@@ -87,19 +76,6 @@ const Checkout = () => {
       ctx.textAlign = 'left';
       y += 30;
     });
-
-    // Special Request
-    if (specialRequest) {
-      y += 10;
-      ctx.font = 'bold 14px Arial';
-      ctx.fillText('Special Request:', 40, y);
-      y += 25;
-      ctx.font = '14px Arial';
-      ctx.fillStyle = '#666666';
-      ctx.fillText(specialRequest, 40, y);
-      ctx.fillStyle = '#000000';
-      y += 25;
-    }
 
     // Divider
     y += 10;
@@ -123,7 +99,7 @@ const Checkout = () => {
     ctx.fillStyle = '#666666';
     ctx.font = '12px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('Please show this to the counter.', canvas.width / 2, y);
+    ctx.fillText('Kindly present this at the counter to confirm your order.', canvas.width / 2, y);
     ctx.fillText('Thank you for your order!', canvas.width / 2, y + 20);
 
     // Convert canvas to blob and download
@@ -141,7 +117,6 @@ const Checkout = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!customerDetails.name) return;
     
     setIsSubmitting(true);
     
@@ -172,11 +147,11 @@ const Checkout = () => {
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert([{
-          customer_name: customerDetails.name,
-          customer_phone: customerDetails.phone || null,
+          customer_name: 'Walk-in Customer',
+          customer_phone: null,
           total_price: calculatedTotal,
           order_type: 'walk-in',
-          special_request: customerDetails.specialRequest || null
+          special_request: null
         }])
         .select()
         .single();
@@ -239,7 +214,7 @@ const Checkout = () => {
           </button>
           <h1>Your <span>Order</span></h1>
           <div className="checkout-instruction-banner">
-            <p>📱 <strong>Show this to our counter staff</strong> - No need to submit online!</p>
+            <p>📱 <strong>Kindly present this at the counter to confirm your order</strong> - No need to submit online!</p>
           </div>
         </header>
 
@@ -270,12 +245,6 @@ const Checkout = () => {
                   <div className="receipt-line">
                     <span>Date: {new Date().toLocaleDateString()}</span>
                   </div>
-                  <div className="receipt-line">
-                    <span>Customer: {customerDetails.name}</span>
-                  </div>
-                  <div className="receipt-line">
-                    <span>Phone: {customerDetails.phone || 'N/A'}</span>
-                  </div>
                   
                   <div className="receipt-divider-preview"></div>
                   
@@ -288,18 +257,6 @@ const Checkout = () => {
                   
                   <div className="receipt-divider-preview"></div>
                   
-                  {customerDetails.specialRequest && (
-                    <>
-                      <div className="receipt-line">
-                        <span style={{ fontWeight: 'bold' }}>Special Request:</span>
-                      </div>
-                      <div className="receipt-line" style={{ marginLeft: '10px', fontSize: '0.9em', color: '#666' }}>
-                        <span>{customerDetails.specialRequest}</span>
-                      </div>
-                      <div className="receipt-divider-preview"></div>
-                    </>
-                  )}
-                  
                   <div className="receipt-total-line">
                     <span>TOTAL:</span>
                     <span>₱{placedOrderTotal.toFixed(2)}</span>
@@ -308,10 +265,10 @@ const Checkout = () => {
               </div>
             </div>
             
-            <p>Your order has been successfully submitted! The receipt is displayed above with your order reference number <strong>#{placedOrderRef}</strong>. You can optionally download the receipt file to show to our counter staff, or simply show this screen to complete your payment and collect your fresh sushi order.</p>
+            <p>Your order has been successfully submitted! The receipt is displayed above with your order reference number <strong>#{placedOrderRef}</strong>. You can optionally download the receipt file, or simply present this screen at the counter to confirm your order and complete your payment.</p>
             
             <div className="success-actions">
-              <button className="download-receipt-btn" onClick={() => handleDownloadReceipt(customerDetails.name, customerDetails.phone, placedOrderItems, placedOrderTotal, customerDetails.specialRequest, placedOrderRef)}>
+              <button className="download-receipt-btn" onClick={() => handleDownloadReceipt(placedOrderItems, placedOrderTotal, placedOrderRef)}>
                 📥 Download Order Receipt
               </button>
               <button className="back-home-btn" onClick={() => navigate('/')}>
@@ -322,52 +279,19 @@ const Checkout = () => {
         ) : (
           <div className="checkout-grid">
           <div className="checkout-main">
-            <motion.form 
+            <motion.div 
               className="details-form glass"
-              onSubmit={handleSubmit}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
             >
               <div className="form-section">
                 <div className="section-title">
                   <span className="step">1</span>
-                  <h3>Customer Details</h3>
+                  <h3>Ready to Order</h3>
                 </div>
                 <div className="form-info-alert">
                   <span className="badge">Walk-in Only</span>
-                  <p>📱 Just show this screen to our counter - we'll take your order and you pay there!</p>
-                </div>
-                
-                <div className="input-row">
-                  <div className="input-group">
-                    <label><User size={16} /> Full Name</label>
-                    <input 
-                      type="text" 
-                      placeholder="e.g. John Doe"
-                      value={customerDetails.name}
-                      onChange={e => setCustomerDetails({...customerDetails, name: e.target.value})}
-                      required
-                    />
-                  </div>
-                  <div className="input-group">
-                    <label><Phone size={16} /> Phone Number (Optional)</label>
-                    <input 
-                      type="tel" 
-                      placeholder="09XX XXX XXXX"
-                      value={customerDetails.phone}
-                      onChange={e => setCustomerDetails({...customerDetails, phone: e.target.value})}
-                    />
-                  </div>
-                </div>
-                
-                <div className="input-group full-width">
-                  <label>💬 Special Request (Optional)</label>
-                  <textarea 
-                    placeholder="Any special instructions? (e.g., No wasabi, extra ginger, allergies)"
-                    value={customerDetails.specialRequest}
-                    onChange={e => setCustomerDetails({...customerDetails, specialRequest: e.target.value})}
-                    rows="3"
-                  />
+                  <p>📱 Simply click "Submit Order" below to generate your receipt. Kindly present it at the counter to confirm your order and complete your payment.</p>
                 </div>
               </div>
 
@@ -391,13 +315,13 @@ const Checkout = () => {
               </div>
 
               <button 
-                type="submit" 
+                onClick={handleSubmit}
                 className={`submit-order-btn ${isSubmitting ? 'loading' : ''}`}
-                disabled={isSubmitting || !customerDetails.name}
+                disabled={isSubmitting}
               >
                 {isSubmitting ? 'Processing...' : '🍣 Submit Order'}
               </button>
-            </motion.form>
+            </motion.div>
           </div>
 
           <aside className="checkout-summary">
@@ -462,18 +386,6 @@ const Checkout = () => {
                     <span>Date:</span>
                     <span>{new Date().toLocaleString()}</span>
                   </div>
-                  
-                  <div className="receipt-section">
-                    <h4>Customer:</h4>
-                    <div className="receipt-row">
-                      <span>Name:</span>
-                      <span>{customerDetails.name}</span>
-                    </div>
-                    <div className="receipt-row">
-                      <span>Phone:</span>
-                      <span>{customerDetails.phone || 'N/A'}</span>
-                    </div>
-                  </div>
 
                   <div className="receipt-section">
                     <h4>Order Items:</h4>
@@ -485,15 +397,6 @@ const Checkout = () => {
                     ))}
                   </div>
 
-                  {customerDetails.specialRequest && (
-                    <div className="receipt-section">
-                      <h4>Special Request:</h4>
-                      <p style={{ fontSize: '0.9rem', color: '#666666', marginTop: '8px', fontWeight: '500' }}>
-                        {customerDetails.specialRequest}
-                      </p>
-                    </div>
-                  )}
-
                   <div className="receipt-divider"></div>
                   
                   <div className="receipt-total">
@@ -502,7 +405,7 @@ const Checkout = () => {
                   </div>
 
                   <div className="receipt-footer">
-                    <p>Please show this to the counter.</p>
+                    <p>Kindly present this at the counter to confirm your order.</p>
                     <p>Thank you for your order!</p>
                   </div>
                 </div>
@@ -511,7 +414,7 @@ const Checkout = () => {
             
             <div className="receipt-modal-actions">
               <button className="download-from-modal" onClick={() => {
-                handleDownloadReceipt(customerDetails.name, customerDetails.phone, orderSuccess ? placedOrderItems : cart, orderSuccess ? placedOrderTotal : cartTotal, customerDetails.specialRequest, placedOrderRef);
+                handleDownloadReceipt(orderSuccess ? placedOrderItems : cart, orderSuccess ? placedOrderTotal : cartTotal, placedOrderRef);
                 setShowReceiptPreview(false);
               }}>
                 📥 Download as PNG
