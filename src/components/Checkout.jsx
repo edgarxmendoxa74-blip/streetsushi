@@ -9,6 +9,7 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { cart, cartTotal, clearCart } = useCart();
   const [customerDetails, setCustomerDetails] = useState({ name: '', phone: '', specialRequest: '' });
+  const [phoneError, setPhoneError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [placedOrderItems, setPlacedOrderItems] = useState([]);
@@ -22,6 +23,43 @@ const Checkout = () => {
       navigate('/');
     }
   }, [cart, orderSuccess, navigate]);
+
+  const validatePhoneNumber = (phone) => {
+    // If empty, it's optional so no error
+    if (!phone || phone.trim() === '') {
+      setPhoneError('');
+      return true;
+    }
+
+    // Remove all spaces, dashes, and parentheses
+    const cleanPhone = phone.replace(/[\s\-()]/g, '');
+    
+    // Check if it's a valid Philippine mobile number
+    // Should start with 09 and have 11 digits total
+    const philippinePattern = /^09\d{9}$/;
+    
+    if (!philippinePattern.test(cleanPhone)) {
+      setPhoneError('Please enter a valid Philippine mobile number (e.g., 09XX XXX XXXX)');
+      return false;
+    }
+    
+    setPhoneError('');
+    return true;
+  };
+
+  const handlePhoneChange = (e) => {
+    const value = e.target.value;
+    // Allow only numbers, spaces, dashes, and parentheses
+    const sanitized = value.replace(/[^\d\s\-()]/g, '');
+    setCustomerDetails({...customerDetails, phone: sanitized});
+    
+    // Validate on change
+    if (sanitized.length > 0) {
+      validatePhoneNumber(sanitized);
+    } else {
+      setPhoneError('');
+    }
+  };
 
   const handleDownloadReceipt = (name, phone, items, total, specialRequest, orderRefNumber = null) => {
     // Create a canvas to draw the receipt
@@ -142,6 +180,11 @@ const Checkout = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!customerDetails.name) return;
+    
+    // Validate phone number if provided
+    if (customerDetails.phone && !validatePhoneNumber(customerDetails.phone)) {
+      return;
+    }
     
     setIsSubmitting(true);
     // Capture cart items and total for the summary/copy before clearing
@@ -347,8 +390,11 @@ const Checkout = () => {
                       type="tel" 
                       placeholder="09XX XXX XXXX"
                       value={customerDetails.phone}
-                      onChange={e => setCustomerDetails({...customerDetails, phone: e.target.value})}
+                      onChange={handlePhoneChange}
+                      className={phoneError ? 'input-error' : ''}
+                      maxLength="13"
                     />
+                    {phoneError && <span className="error-message">{phoneError}</span>}
                   </div>
                 </div>
                 
@@ -385,7 +431,7 @@ const Checkout = () => {
               <button 
                 type="submit" 
                 className={`submit-order-btn ${isSubmitting ? 'loading' : ''}`}
-                disabled={isSubmitting || !customerDetails.name}
+                disabled={isSubmitting || !customerDetails.name || phoneError}
               >
                 {isSubmitting ? 'Processing...' : '🍣 Submit Order'}
               </button>
@@ -682,6 +728,26 @@ const Checkout = () => {
           border-color: var(--street-orange);
           background: white;
           box-shadow: 0 0 0 5px rgba(255, 107, 0, 0.1);
+        }
+
+        .input-group input.input-error,
+        .input-group textarea.input-error {
+          border-color: #ef4444;
+          background: #fef2f2;
+        }
+
+        .input-group input.input-error:focus,
+        .input-group textarea.input-error:focus {
+          border-color: #ef4444;
+          box-shadow: 0 0 0 5px rgba(239, 68, 68, 0.1);
+        }
+
+        .error-message {
+          display: block;
+          color: #ef4444;
+          font-size: 0.8rem;
+          font-weight: 600;
+          margin-top: 6px;
         }
 
         .payment-options {

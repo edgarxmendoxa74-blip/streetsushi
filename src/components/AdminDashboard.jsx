@@ -344,10 +344,12 @@ const AdminDashboard = () => {
     const headers = ['Order ID', 'Customer Name', 'Phone', 'Items', 'Total Price', 'Status', 'Special Request', 'Date/Time'];
     const rows = orders.map(order => {
       const items = order.order_items?.map(it => `${it.quantity}x ${it.item_name}`).join('; ') || '';
+      // Prefix phone with single quote to preserve as text in Excel and prevent leading zero removal
+      const phone = order.customer_phone ? `'${order.customer_phone}` : 'N/A';
       return [
         order.id,
         order.customer_name,
-        order.customer_phone || 'N/A',
+        phone,
         items,
         order.total_price.toFixed(2),
         order.status,
