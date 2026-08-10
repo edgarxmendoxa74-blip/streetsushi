@@ -10,7 +10,15 @@ export const useCart = () => {
 export const CartProvider = ({ children }) => {
     const [cart, setCart] = useState(() => {
         const savedCart = localStorage.getItem('cart');
-        return savedCart ? JSON.parse(savedCart) : [];
+        if (savedCart) {
+            const parsedCart = JSON.parse(savedCart);
+            // Ensure all prices are numbers when loading from localStorage
+            return parsedCart.map(item => ({
+                ...item,
+                price: parseFloat(item.price) || 0
+            }));
+        }
+        return [];
     });
 
     const [isCartOpen, setIsCartOpen] = useState(false);
@@ -41,7 +49,8 @@ export const CartProvider = ({ children }) => {
                     i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
                 );
             }
-            return [...prevCart, { ...item, quantity: 1 }];
+            // Ensure price is a number when adding to cart
+            return [...prevCart, { ...item, price: parseFloat(item.price), quantity: 1 }];
         });
         setIsCartOpen(true); // Open cart when item is added
     };
@@ -68,7 +77,11 @@ export const CartProvider = ({ children }) => {
 
     const toggleCart = () => setIsCartOpen(!isCartOpen);
 
-    const cartTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+    const cartTotal = cart.reduce((total, item) => {
+        const price = parseFloat(item.price) || 0;
+        const quantity = parseInt(item.quantity) || 0;
+        return total + (price * quantity);
+    }, 0);
     const cartCount = cart.reduce((count, item) => count + item.quantity, 0);
 
     return (

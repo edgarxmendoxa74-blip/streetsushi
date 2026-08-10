@@ -12,6 +12,7 @@ const Checkout = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [placedOrderItems, setPlacedOrderItems] = useState([]);
+  const [placedOrderTotal, setPlacedOrderTotal] = useState(0);
   const [placedOrderRef, setPlacedOrderRef] = useState('');
   const [showReceiptPreview, setShowReceiptPreview] = useState(false);
 
@@ -143,8 +144,17 @@ const Checkout = () => {
     if (!customerDetails.name) return;
     
     setIsSubmitting(true);
-    // Capture cart items for the summary/copy before clearing
+    
+    // Calculate total directly from cart items to ensure accuracy
+    const calculatedTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    console.log('Cart items:', cart);
+    console.log('Calculated total:', calculatedTotal);
+    console.log('CartTotal from context:', cartTotal);
+    
+    // Capture cart items and total for the summary/copy before clearing
     setPlacedOrderItems([...cart]);
+    setPlacedOrderTotal(calculatedTotal);
 
     try {
       // Validate cart has items
@@ -164,7 +174,7 @@ const Checkout = () => {
         .insert([{
           customer_name: customerDetails.name,
           customer_phone: customerDetails.phone || null,
-          total_price: cartTotal,
+          total_price: calculatedTotal,
           order_type: 'walk-in',
           special_request: customerDetails.specialRequest || null
         }])
@@ -292,7 +302,7 @@ const Checkout = () => {
                   
                   <div className="receipt-total-line">
                     <span>TOTAL:</span>
-                    <span>₱{cartTotal.toFixed(2)}</span>
+                    <span>₱{placedOrderTotal.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -301,7 +311,7 @@ const Checkout = () => {
             <p>Your order has been successfully submitted! The receipt is displayed above with your order reference number <strong>#{placedOrderRef}</strong>. You can optionally download the receipt file to show to our counter staff, or simply show this screen to complete your payment and collect your fresh sushi order.</p>
             
             <div className="success-actions">
-              <button className="download-receipt-btn" onClick={() => handleDownloadReceipt(customerDetails.name, customerDetails.phone, placedOrderItems, cartTotal, customerDetails.specialRequest, placedOrderRef)}>
+              <button className="download-receipt-btn" onClick={() => handleDownloadReceipt(customerDetails.name, customerDetails.phone, placedOrderItems, placedOrderTotal, customerDetails.specialRequest, placedOrderRef)}>
                 📥 Download Order Receipt
               </button>
               <button className="back-home-btn" onClick={() => navigate('/')}>
@@ -488,7 +498,7 @@ const Checkout = () => {
                   
                   <div className="receipt-total">
                     <span>TOTAL AMOUNT:</span>
-                    <span>₱{cartTotal.toFixed(2)}</span>
+                    <span>₱{(orderSuccess ? placedOrderTotal : cartTotal).toFixed(2)}</span>
                   </div>
 
                   <div className="receipt-footer">
@@ -501,7 +511,7 @@ const Checkout = () => {
             
             <div className="receipt-modal-actions">
               <button className="download-from-modal" onClick={() => {
-                handleDownloadReceipt(customerDetails.name, customerDetails.phone, orderSuccess ? placedOrderItems : cart, cartTotal, customerDetails.specialRequest, placedOrderRef);
+                handleDownloadReceipt(customerDetails.name, customerDetails.phone, orderSuccess ? placedOrderItems : cart, orderSuccess ? placedOrderTotal : cartTotal, customerDetails.specialRequest, placedOrderRef);
                 setShowReceiptPreview(false);
               }}>
                 📥 Download as PNG
