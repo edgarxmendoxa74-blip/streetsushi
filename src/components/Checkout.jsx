@@ -214,7 +214,7 @@ const Checkout = () => {
           </button>
           <h1>Your <span>Order</span></h1>
           <div className="checkout-instruction-banner">
-            <p>📱 <strong>Kindly present this at the counter to confirm your order</strong> - No need to submit online!</p>
+            <p>📱 <strong>Kindly present this at the counter to confirm your order</strong></p>
           </div>
         </header>
 
@@ -291,7 +291,7 @@ const Checkout = () => {
                 </div>
                 <div className="form-info-alert">
                   <span className="badge">Walk-in Only</span>
-                  <p>📱 Simply click "Submit Order" below to generate your receipt. Kindly present it at the counter to confirm your order and complete your payment.</p>
+                  <p>📱 Simply click "Submit Order" below to generate your receipt. Show it to our counter staff to complete your payment and collect your fresh sushi!</p>
                 </div>
               </div>
 
