@@ -265,7 +265,7 @@ const Checkout = () => {
               </div>
             </div>
             
-            <p>Your order has been successfully submitted! The receipt is displayed above with your order reference number <strong>#{placedOrderRef}</strong>. You can optionally download the receipt file, or simply present this screen at the counter to confirm your order and complete your payment.</p>
+            <p className="success-instruction">You can optionally download the receipt file to show to our counter staff, or simply show this screen to complete your payment and collect your fresh sushi order.</p>
             
             <div className="success-actions">
               <button className="download-receipt-btn" onClick={() => handleDownloadReceipt(placedOrderItems, placedOrderTotal, placedOrderRef)}>
@@ -773,6 +773,18 @@ const Checkout = () => {
           color: var(--muted-gray);
           margin-bottom: 40px;
           line-height: 1.6;
+        }
+        
+        .success-instruction {
+          font-size: 1rem;
+          color: var(--street-black);
+          background: rgba(255, 107, 0, 0.05);
+          padding: 20px 30px;
+          border-radius: 16px;
+          margin: 30px 0;
+          line-height: 1.7;
+          border-left: 4px solid var(--street-orange);
+          text-align: left;
         }
         
         .receipt-preview-visual {
