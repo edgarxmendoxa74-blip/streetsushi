@@ -229,6 +229,8 @@ const Checkout = () => {
             </div>
             <h2>Order <span>Confirmed!</span></h2>
             
+            <p className="success-instruction-top">You can optionally download the receipt file to show to our counter staff, or simply show this screen to complete your payment and collect your fresh sushi order.</p>
+            
             {/* Receipt Preview Visual */}
             <div className="receipt-preview-visual">
               <div className="receipt-paper-preview">
@@ -264,8 +266,6 @@ const Checkout = () => {
                 </div>
               </div>
             </div>
-            
-            <p className="success-instruction">You can optionally download the receipt file to show to our counter staff, or simply show this screen to complete your payment and collect your fresh sushi order.</p>
             
             <div className="success-actions">
               <button className="download-receipt-btn" onClick={() => handleDownloadReceipt(placedOrderItems, placedOrderTotal, placedOrderRef)}>
@@ -768,6 +768,21 @@ const Checkout = () => {
           margin-bottom: 20px;
         }
         .order-success-view h2 span { color: #10b981; }
+        
+        .success-instruction-top {
+          font-size: 1.05rem;
+          color: var(--street-black);
+          background: linear-gradient(135deg, rgba(255, 107, 0, 0.08) 0%, rgba(255, 107, 0, 0.03) 100%);
+          padding: 20px 30px;
+          border-radius: 16px;
+          margin: 20px 0 30px;
+          line-height: 1.7;
+          border: 2px solid rgba(255, 107, 0, 0.2);
+          text-align: center;
+          font-weight: 500;
+          box-shadow: 0 4px 15px rgba(255, 107, 0, 0.1);
+        }
+        
         .order-success-view p {
           font-size: 1.1rem;
           color: var(--muted-gray);
