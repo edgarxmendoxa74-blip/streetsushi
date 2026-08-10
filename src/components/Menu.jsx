@@ -5,14 +5,13 @@ import { useCart } from '../context/CartContext';
 
 const Menu = () => {
   const [activeCategory, setActiveCategory] = useState("All");
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedItem, setSelectedItem] = useState(null);
   const [menuItems, setMenuItems] = useState([]);
   const [categories, setCategories] = useState(["All"]);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const scrollRef = useRef(null);
-  const { addToCart } = useCart();
+  const { addToCart, searchQuery } = useCart();
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -75,14 +74,6 @@ const Menu = () => {
       <div className="section-header">
         <span className="subtitle">Exploration</span>
         <h2>Our <span>Menu</span></h2>
-        <div className="search-container glass">
-          <input 
-            type="text" 
-            placeholder="Search our flavors..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
       </div>
 
       <div className="filter-wrapper">
@@ -298,16 +289,6 @@ const Menu = () => {
           letter-spacing: 1px;
           z-index: 5;
           box-shadow: 0 4px 10px rgba(255, 107, 0, 0.3);
-        }
-
-        .filter-wrapper::before {
-          left: 0;
-          background: linear-gradient(90deg, var(--bg-light) 10%, transparent 100%);
-        }
-
-        .filter-wrapper::after {
-          right: 0;
-          background: linear-gradient(-90deg, var(--bg-light) 10%, transparent 100%);
         }
 
         .scroll-btn {

@@ -1,5 +1,5 @@
-import { Menu as MenuIcon, ShoppingBag, MapPin, Phone, MessageCircle, ExternalLink, X, Plus, Minus, Trash2, ArrowRight, User, Hash } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Menu as MenuIcon, ShoppingBag, MapPin, Phone, MessageCircle, ExternalLink, X, Plus, Minus, Trash2, ArrowRight, User, Hash, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
@@ -9,8 +9,30 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [logo, setLogo] = useState('/logo.png');
   const [contactInfo, setContactInfo] = useState(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const catScrollRef = useRef(null);
 
-  const { cart, cartCount, cartTotal, removeFromCart, updateQuantity, isCartOpen, setIsCartOpen, toggleCart, clearCart } = useCart();
+  const { cart, cartCount, cartTotal, removeFromCart, updateQuantity, isCartOpen, setIsCartOpen, toggleCart, clearCart, searchQuery, setSearchQuery, activeCategory, setActiveCategory, categories } = useCart();
+
+  const handleCatScroll = () => {
+    if (catScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = catScrollRef.current;
+      setCanScrollLeft(scrollLeft > 10);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  const scrollCats = (direction) => {
+    if (catScrollRef.current) {
+      catScrollRef.current.scrollBy({ left: direction === 'left' ? -200 : 200, behavior: 'smooth' });
+    }
+  };
+
+  useEffect(() => {
+    // Check scroll on categories load
+    setTimeout(handleCatScroll, 300);
+  }, [categories]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,19 +65,22 @@ const Navbar = () => {
   return (
     <nav className="navbar glass">
       <div className="nav-container">
-        <div className="logo">
+        <div className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
           <img src={logo} alt="Street Sushi Logo" className="logo-img" />
+        </div>
+
+        {/* Search Bar in Header */}
+        <div className="header-search-container glass">
+          <Search size={18} className="search-icon" />
+          <input 
+            type="text" 
+            placeholder="Search our flavors..." 
+            value={searchQuery || ''}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
         
         <div className="nav-actions">
-          <div className="contact-wrapper">
-            <button 
-              className="order-btn"
-              onClick={() => navigate('/contact')}
-            >
-              Contact
-            </button>
-          </div>
 
           <div className="cart-wrapper">
             <button 
@@ -140,7 +165,7 @@ const Navbar = () => {
                               setIsCartOpen(false);
                               navigate('/checkout');
                             }}>
-                              Proceed to Checkout <ArrowRight size={18} />
+                              Proceed to Order <ArrowRight size={18} />
                             </button>
                           </div>
                         </>
@@ -154,17 +179,44 @@ const Navbar = () => {
         </div>
       </div>
 
+      {/* Category Strip */}
+      <div className="cat-strip">
+        <div className="cat-strip-inner">
+          {canScrollLeft && (
+            <button className="cat-arrow cat-arrow-left" onClick={() => scrollCats('left')}>
+              <ChevronLeft size={18} />
+            </button>
+          )}
+          <div className="cat-scroll" ref={catScrollRef} onScroll={handleCatScroll}>
+            {categories.map(cat => (
+              <button
+                key={cat}
+                className={`cat-pill ${activeCategory === cat ? 'active' : ''}`}
+                onClick={() => setActiveCategory(cat)}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+          {canScrollRight && (
+            <button className="cat-arrow cat-arrow-right" onClick={() => scrollCats('right')}>
+              <ChevronRight size={18} />
+            </button>
+          )}
+        </div>
+      </div>
+
       <style jsx="true">{`
         .navbar {
           position: fixed;
           top: 0;
           left: 0;
           width: 100%;
-          height: 80px;
+          height: auto;
           display: flex;
-          align-items: center;
+          flex-direction: column;
           z-index: 1000;
-          padding: 0 5%;
+          padding: 0;
         }
 
         .nav-container {
@@ -174,6 +226,152 @@ const Navbar = () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          height: 80px;
+          padding: 0 5%;
+        }
+
+        /* Category Strip */
+        .cat-strip {
+          width: 100%;
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(12px);
+          border-top: 1px solid rgba(0,0,0,0.04);
+          border-bottom: 1px solid rgba(0,0,0,0.06);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .cat-strip-inner {
+          max-width: 1400px;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          padding: 0 5%;
+          position: relative;
+        }
+
+        .cat-scroll {
+          display: flex;
+          gap: 8px;
+          padding: 10px 0;
+          overflow-x: auto;
+          scroll-behavior: smooth;
+          scrollbar-width: none;
+          flex: 1;
+        }
+
+        .cat-scroll::-webkit-scrollbar {
+          display: none;
+        }
+
+        .cat-pill {
+          flex: 0 0 auto;
+          padding: 7px 20px;
+          border: 1px solid rgba(0,0,0,0.08);
+          background: transparent;
+          color: var(--muted-gray);
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.8px;
+          font-size: 0.78rem;
+          transition: var(--transition);
+          border-radius: 50px;
+          cursor: pointer;
+          white-space: nowrap;
+        }
+
+        .cat-pill:hover {
+          border-color: var(--street-orange);
+          color: var(--street-orange);
+        }
+
+        .cat-pill.active {
+          background: var(--street-orange);
+          color: white;
+          border-color: var(--street-orange);
+          box-shadow: 0 3px 10px rgba(255, 107, 0, 0.2);
+        }
+
+        .cat-arrow {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          background: white;
+          border: 1px solid rgba(0,0,0,0.1);
+          color: var(--muted-gray);
+          cursor: pointer;
+          flex-shrink: 0;
+          transition: var(--transition);
+          z-index: 2;
+        }
+
+        .cat-arrow:hover {
+          background: var(--street-orange);
+          color: white;
+          border-color: var(--street-orange);
+        }
+
+        .cat-arrow-left {
+          margin-right: 8px;
+        }
+
+        .cat-arrow-right {
+          margin-left: 8px;
+        }
+
+        .nav-container {
+          width: 100%;
+          max-width: 1400px;
+          margin: 0 auto;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .header-search-container {
+          display: flex;
+          align-items: center;
+          background: rgba(255, 255, 255, 0.8);
+          border: 1px solid rgba(0, 0, 0, 0.08);
+          border-radius: 50px;
+          padding: 8px 20px;
+          width: 380px;
+          max-width: 40%;
+          gap: 12px;
+          transition: var(--transition);
+        }
+
+        .header-search-container:focus-within {
+          background: white;
+          border-color: var(--street-orange);
+          box-shadow: 0 4px 15px rgba(255, 107, 0, 0.1);
+        }
+
+        .header-search-container input {
+          border: none;
+          outline: none;
+          background: transparent;
+          width: 100%;
+          font-family: inherit;
+          font-weight: 500;
+          color: var(--street-black);
+          font-size: 0.95rem;
+        }
+
+        .header-search-container input::placeholder {
+          color: var(--muted-gray);
+          opacity: 0.8;
+        }
+
+        .header-search-container .search-icon {
+          color: var(--muted-gray);
+          transition: var(--transition);
+        }
+
+        .header-search-container:focus-within .search-icon {
+          color: var(--street-orange);
         }
 
         .logo-img {
@@ -827,20 +1025,112 @@ const Navbar = () => {
 
         @media (max-width: 768px) {
           .navbar {
-            height: 65px;
+            height: auto;
           }
+          
+          .nav-container {
+            height: 70px;
+            padding: 0 4%;
+          }
+          
           .nav-links {
             display: none;
           }
+          
           .logo-img {
-            height: 35px;
+            height: 50px;
+            width: 50px;
           }
-          .order-btn {
-            padding: 8px 16px;
+          
+          .header-search-container {
+            flex: 1;
+            max-width: none;
+            width: auto;
+            padding: 8px 15px;
+            margin: 0 15px;
+          }
+          
+          .header-search-container input {
+            font-size: 0.85rem;
+          }
+          
+          .nav-actions {
+            gap: 10px;
+          }
+          
+          .cart-btn {
+            width: 42px;
+            height: 42px;
+          }
+
+          .cat-strip-inner {
+            padding: 0 4%;
+          }
+
+          .cat-pill {
+            padding: 6px 16px;
+            font-size: 0.75rem;
+          }
+
+          .cat-arrow {
+            width: 28px;
+            height: 28px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .nav-container {
+            height: 65px;
+            padding: 0 3%;
+          }
+          
+          .logo-img {
+            height: 45px;
+            width: 45px;
+          }
+          
+          .header-search-container {
+            padding: 6px 12px;
+            margin: 0 10px;
+            gap: 8px;
+          }
+          
+          .header-search-container input {
+            font-size: 0.8rem;
+          }
+          
+          .header-search-container .search-icon {
+            width: 16px;
+            height: 16px;
+          }
+          
+          .nav-actions {
+            gap: 8px;
+          }
+          
+          .cart-btn {
+            width: 38px;
+            height: 38px;
+          }
+          
+          .cart-badge {
+            width: 18px;
+            height: 18px;
+            font-size: 0.65rem;
+          }
+
+          .cat-strip-inner {
+            padding: 0 3%;
+          }
+
+          .cat-pill {
+            padding: 5px 14px;
             font-size: 0.7rem;
           }
-          .nav-actions {
-            gap: 12px;
+
+          .cat-arrow {
+            width: 26px;
+            height: 26px;
           }
         }
       `}</style>

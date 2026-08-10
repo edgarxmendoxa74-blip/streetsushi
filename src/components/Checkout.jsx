@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Phone, ShoppingBag, CheckCircle, CreditCard, Copy, Download } from 'lucide-react';
+import { ArrowLeft, User, Phone, ShoppingBag, CheckCircle, CreditCard } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { supabase } from '../lib/supabase';
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { cart, cartTotal, clearCart } = useCart();
-  const [customerDetails, setCustomerDetails] = useState({ name: '', phone: '' });
+  const [customerDetails, setCustomerDetails] = useState({ name: '', phone: '', specialRequest: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [placedOrderItems, setPlacedOrderItems] = useState([]);
-  const [isCopied, setIsCopied] = useState(false);
+  const [placedOrderRef, setPlacedOrderRef] = useState('');
+  const [showReceiptPreview, setShowReceiptPreview] = useState(false);
 
   // If cart is empty and not in success state, redirect back to menu
   React.useEffect(() => {
@@ -21,42 +22,120 @@ const Checkout = () => {
     }
   }, [cart, orderSuccess, navigate]);
 
-  const handleDownloadReceipt = (name, phone, items, total) => {
-    const itemsText = items.map(item => `${item.quantity}x ${item.name} - ₱${(item.price * item.quantity).toFixed(2)}`).join('\n');
-    const content = `🍣 STREET SUSHI RECEIPT\n` +
-                    `--------------------------\n` +
-                    `Date: ${new Date().toLocaleString()}\n` +
-                    `Customer: ${name}\n` +
-                    `Phone: ${phone || 'N/A'}\n\n` +
-                    `Order Items:\n${itemsText}\n` +
-                    `--------------------------\n` +
-                    `TOTAL AMOUNT: ₱${total.toFixed(2)}\n\n` +
-                    `Please show this to the counter.\n` +
-                    `Thank you for your order!`;
+  const handleDownloadReceipt = (name, phone, items, total, specialRequest, orderRefNumber = null) => {
+    // Create a canvas to draw the receipt
+    const canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 530 + (items.length * 30) + (specialRequest ? 40 : 0);
+    const ctx = canvas.getContext('2d');
 
-    const element = document.createElement("a");
-    const file = new Blob([content], {type: 'text/plain'});
-    element.href = URL.createObjectURL(file);
-    element.download = `street-sushi-receipt-${Date.now()}.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-  };
+    // Background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  const handleCopy = (e) => {
-    if (e) e.preventDefault();
-    if (!customerDetails.name) return; // Prevent copying if name is empty
+    // Header
+    ctx.fillStyle = '#ff6b00';
+    ctx.fillRect(0, 0, canvas.width, 100);
     
-    const items = orderSuccess ? placedOrderItems : cart;
-    const itemsText = items.map(item => `${item.quantity}x ${item.name} - ₱${(item.price * item.quantity).toFixed(2)}`).join('\n');
-    const name = orderSuccess ? customerDetails.name : (customerDetails.name || 'Guest');
-    const phone = customerDetails.phone || 'N/A';
+    // Title
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 32px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('🍣 STREET SUSHI', canvas.width / 2, 45);
+    ctx.font = '16px Arial';
+    ctx.fillText('ORDER RECEIPT', canvas.width / 2, 75);
+
+    // Body
+    let y = 130;
+    ctx.fillStyle = '#000000';
+    ctx.font = '14px Arial';
+    ctx.textAlign = 'left';
     
-    const fullText = `🍣 Street Sushi Order\n------------------\nCustomer: ${name}\nPhone: ${phone}\n\nItems:\n${itemsText}\n------------------\nTotal: ₱${cartTotal.toFixed(2)}\n\nThank you!`;
+    // Order Reference Number
+    if (orderRefNumber) {
+      ctx.font = 'bold 16px Arial';
+      ctx.fillText(`Order Ref: #${orderRefNumber}`, 40, y);
+      y += 25;
+    }
     
-    navigator.clipboard.writeText(fullText);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
+    // Date
+    ctx.font = '14px Arial';
+    ctx.fillText(`Date: ${new Date().toLocaleString()}`, 40, y);
+    y += 30;
+    
+    // Customer Details
+    ctx.font = 'bold 16px Arial';
+    ctx.fillText('Customer:', 40, y);
+    y += 25;
+    ctx.font = '14px Arial';
+    ctx.fillText(`Name: ${name}`, 40, y);
+    y += 25;
+    ctx.fillText(`Phone: ${phone || 'N/A'}`, 40, y);
+    y += 35;
+
+    // Items
+    ctx.font = 'bold 16px Arial';
+    ctx.fillText('Order Items:', 40, y);
+    y += 25;
+    ctx.font = '14px Arial';
+    
+    items.forEach(item => {
+      ctx.fillText(`${item.quantity}x ${item.name}`, 40, y);
+      ctx.textAlign = 'right';
+      ctx.fillText(`₱${(item.price * item.quantity).toFixed(2)}`, canvas.width - 40, y);
+      ctx.textAlign = 'left';
+      y += 30;
+    });
+
+    // Special Request
+    if (specialRequest) {
+      y += 10;
+      ctx.font = 'bold 14px Arial';
+      ctx.fillText('Special Request:', 40, y);
+      y += 25;
+      ctx.font = '14px Arial';
+      ctx.fillStyle = '#666666';
+      ctx.fillText(specialRequest, 40, y);
+      ctx.fillStyle = '#000000';
+      y += 25;
+    }
+
+    // Divider
+    y += 10;
+    ctx.strokeStyle = '#cccccc';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(40, y);
+    ctx.lineTo(canvas.width - 40, y);
+    ctx.stroke();
+    y += 30;
+
+    // Total
+    ctx.font = 'bold 20px Arial';
+    ctx.fillText('TOTAL AMOUNT:', 40, y);
+    ctx.fillStyle = '#ff6b00';
+    ctx.textAlign = 'right';
+    ctx.fillText(`₱${total.toFixed(2)}`, canvas.width - 40, y);
+    y += 40;
+
+    // Footer
+    ctx.fillStyle = '#666666';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Please show this to the counter.', canvas.width / 2, y);
+    ctx.fillText('Thank you for your order!', canvas.width / 2, y + 20);
+
+    // Convert canvas to blob and download
+    canvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `street-sushi-receipt-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -75,7 +154,8 @@ const Checkout = () => {
           customer_name: customerDetails.name,
           customer_phone: customerDetails.phone,
           total_price: cartTotal,
-          order_type: 'walk-in'
+          order_type: 'walk-in',
+          special_request: customerDetails.specialRequest
         }])
         .select()
         .single();
@@ -97,8 +177,9 @@ const Checkout = () => {
       
       if (itemsError) throw itemsError;
 
+      // Store the order reference number (first 8 characters of UUID)
+      setPlacedOrderRef(order.id.slice(0, 8));
       setOrderSuccess(true);
-      handleDownloadReceipt(customerDetails.name, customerDetails.phone, [...cart], cartTotal);
       clearCart();
     } catch (err) {
       alert('Error processing order: ' + err.message);
@@ -115,7 +196,10 @@ const Checkout = () => {
           <button className="back-link" onClick={() => navigate('/')}>
             <ArrowLeft size={18} /> Back to Menu
           </button>
-          <h1>Complete Your <span>Order</span></h1>
+          <h1>Your <span>Order</span></h1>
+          <div className="checkout-instruction-banner">
+            <p>📱 <strong>Show this to our counter staff</strong> - No need to submit online!</p>
+          </div>
         </header>
 
         {orderSuccess ? (
@@ -128,9 +212,54 @@ const Checkout = () => {
               <CheckCircle size={80} color="#10b981" />
             </div>
             <h2>Order <span>Confirmed!</span></h2>
-            <p>Your receipt has been downloaded successfully. Please show it to the nearest Street Sushi Resto to complete your payment and collect your perfect sushi!</p>
+            
+            {/* Receipt Preview Visual */}
+            <div className="receipt-preview-visual">
+              <div className="receipt-paper-preview">
+                <div className="receipt-header-preview">
+                  <div className="receipt-logo-preview">🍣</div>
+                  <h3>STREET SUSHI</h3>
+                  <span>ORDER RECEIPT</span>
+                </div>
+                
+                <div className="receipt-body-preview">
+                  <div className="receipt-line">
+                    <span>Order Ref: #{placedOrderRef}</span>
+                  </div>
+                  <div className="receipt-line">
+                    <span>Date: {new Date().toLocaleDateString()}</span>
+                  </div>
+                  <div className="receipt-line">
+                    <span>Customer: {customerDetails.name}</span>
+                  </div>
+                  <div className="receipt-line">
+                    <span>Phone: {customerDetails.phone || 'N/A'}</span>
+                  </div>
+                  
+                  <div className="receipt-divider-preview"></div>
+                  
+                  {(placedOrderItems.length > 0 ? placedOrderItems : cart).map(item => (
+                    <div key={item.id} className="receipt-item-line">
+                      <span>{item.quantity}x {item.name}</span>
+                      <span>₱{(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                  ))}
+                  
+                  <div className="receipt-divider-preview"></div>
+                  
+                  <div className="receipt-total-line">
+                    <span>TOTAL: ₱{cartTotal.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <p>Your order has been successfully submitted! The receipt is displayed above with your order reference number <strong>#{placedOrderRef}</strong>. You can optionally download the receipt file to show to our counter staff, or simply show this screen to complete your payment and collect your fresh sushi order.</p>
             
             <div className="success-actions">
+              <button className="download-receipt-btn" onClick={() => handleDownloadReceipt(customerDetails.name, customerDetails.phone, placedOrderItems, cartTotal, customerDetails.specialRequest, placedOrderRef)}>
+                📥 Download Order Receipt
+              </button>
               <button className="back-home-btn" onClick={() => navigate('/')}>
                 Return to Menu
               </button>
@@ -151,8 +280,8 @@ const Checkout = () => {
                   <h3>Customer Details</h3>
                 </div>
                 <div className="form-info-alert">
-                  <span className="badge">Walk-in Order Only</span>
-                  <p>Visit our counter to pay and receive your fresh sushi.</p>
+                  <span className="badge">Walk-in Only</span>
+                  <p>📱 Just show this screen to our counter - we'll take your order and you pay there!</p>
                 </div>
                 
                 <div className="input-row">
@@ -175,6 +304,16 @@ const Checkout = () => {
                       onChange={e => setCustomerDetails({...customerDetails, phone: e.target.value})}
                     />
                   </div>
+                </div>
+                
+                <div className="input-group full-width">
+                  <label>💬 Special Request (Optional)</label>
+                  <textarea 
+                    placeholder="Any special instructions? (e.g., No wasabi, extra ginger, allergies)"
+                    value={customerDetails.specialRequest}
+                    onChange={e => setCustomerDetails({...customerDetails, specialRequest: e.target.value})}
+                    rows="3"
+                  />
                 </div>
               </div>
 
@@ -202,7 +341,7 @@ const Checkout = () => {
                 className={`submit-order-btn ${isSubmitting ? 'loading' : ''}`}
                 disabled={isSubmitting || !customerDetails.name}
               >
-                {isSubmitting ? 'Processing Your Sushi...' : 'Download Order'}
+                {isSubmitting ? 'Processing...' : '🍣 Submit Order'}
               </button>
             </motion.form>
           </div>
@@ -243,6 +382,85 @@ const Checkout = () => {
         )}
       </div>
 
+      {/* Receipt Preview Modal */}
+      {showReceiptPreview && (
+        <div className="receipt-modal-overlay" onClick={() => setShowReceiptPreview(false)}>
+          <div className="receipt-modal" onClick={e => e.stopPropagation()}>
+            <div className="receipt-header">
+              <h3>📄 Order Receipt Preview</h3>
+              <button className="close-receipt" onClick={() => setShowReceiptPreview(false)}>✕</button>
+            </div>
+            
+            <div className="receipt-content">
+              <div className="receipt-paper">
+                <div className="receipt-header-section">
+                  <div className="receipt-logo">🍣</div>
+                  <h2>STREET SUSHI</h2>
+                  <p>ORDER RECEIPT</p>
+                </div>
+                
+                <div className="receipt-body">
+                  <div className="receipt-row">
+                    <span>Order Ref:</span>
+                    <span>#{placedOrderRef}</span>
+                  </div>
+                  <div className="receipt-row">
+                    <span>Date:</span>
+                    <span>{new Date().toLocaleString()}</span>
+                  </div>
+                  
+                  <div className="receipt-section">
+                    <h4>Customer:</h4>
+                    <div className="receipt-row">
+                      <span>Name:</span>
+                      <span>{customerDetails.name}</span>
+                    </div>
+                    <div className="receipt-row">
+                      <span>Phone:</span>
+                      <span>{customerDetails.phone || 'N/A'}</span>
+                    </div>
+                  </div>
+
+                  <div className="receipt-section">
+                    <h4>Order Items:</h4>
+                    {(orderSuccess ? placedOrderItems : cart).map(item => (
+                      <div key={item.id} className="receipt-item">
+                        <span>{item.quantity}x {item.name}</span>
+                        <span>₱{(item.price * item.quantity).toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="receipt-divider"></div>
+                  
+                  <div className="receipt-total">
+                    <span>TOTAL AMOUNT:</span>
+                    <span>₱{cartTotal.toFixed(2)}</span>
+                  </div>
+
+                  <div className="receipt-footer">
+                    <p>Please show this to the counter.</p>
+                    <p>Thank you for your order!</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="receipt-modal-actions">
+              <button className="download-from-modal" onClick={() => {
+                handleDownloadReceipt(customerDetails.name, customerDetails.phone, orderSuccess ? placedOrderItems : cart, cartTotal, customerDetails.specialRequest, placedOrderRef);
+                setShowReceiptPreview(false);
+              }}>
+                📥 Download as PNG
+              </button>
+              <button className="close-modal-btn" onClick={() => setShowReceiptPreview(false)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style jsx="true">{`
         .checkout-page {
           min-height: 100vh;
@@ -272,6 +490,28 @@ const Checkout = () => {
           color: var(--street-black);
         }
         .checkout-header h1 span { color: var(--street-orange); }
+        
+        .checkout-instruction-banner {
+          margin-top: 20px;
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          padding: 20px 30px;
+          border-radius: 20px;
+          box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2);
+        }
+        
+        .checkout-instruction-banner p {
+          color: white;
+          font-size: 1.1rem;
+          margin: 0;
+          text-align: center;
+          font-weight: 500;
+        }
+        
+        .checkout-instruction-banner strong {
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
 
         .checkout-grid {
           display: grid;
@@ -349,6 +589,10 @@ const Checkout = () => {
           flex-direction: column;
           gap: 8px;
         }
+        
+        .input-group.full-width {
+          grid-column: 1 / -1;
+        }
 
         .input-group label {
           display: flex;
@@ -360,7 +604,8 @@ const Checkout = () => {
           text-transform: uppercase;
         }
 
-        .input-group input {
+        .input-group input,
+        .input-group textarea {
           width: 100%;
           padding: 15px 20px;
           background: #f1f5f9;
@@ -368,9 +613,16 @@ const Checkout = () => {
           border-radius: 14px;
           font-size: 1rem;
           transition: var(--transition);
+          font-family: inherit;
+        }
+        
+        .input-group textarea {
+          resize: vertical;
+          min-height: 80px;
         }
 
-        .input-group input:focus {
+        .input-group input:focus,
+        .input-group textarea:focus {
           outline: none;
           border-color: var(--street-orange);
           background: white;
@@ -556,6 +808,78 @@ const Checkout = () => {
           margin-bottom: 40px;
           line-height: 1.6;
         }
+        
+        .receipt-preview-visual {
+          margin: 30px 0;
+          display: flex;
+          justify-content: center;
+        }
+        
+        .receipt-paper-preview {
+          background: white;
+          border: 2px dashed #d1d5db;
+          border-radius: 12px;
+          padding: 25px;
+          font-family: 'Courier New', monospace;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+          max-width: 350px;
+          width: 100%;
+        }
+        
+        .receipt-header-preview {
+          text-align: center;
+          margin-bottom: 20px;
+          padding-bottom: 15px;
+          border-bottom: 2px solid var(--street-orange);
+        }
+        
+        .receipt-logo-preview {
+          font-size: 2.5rem;
+          margin-bottom: 8px;
+        }
+        
+        .receipt-header-preview h3 {
+          margin: 0;
+          font-size: 1.3rem;
+          color: var(--street-black);
+          letter-spacing: 2px;
+        }
+        
+        .receipt-header-preview span {
+          font-size: 0.8rem;
+          color: var(--muted-gray);
+          letter-spacing: 1px;
+        }
+        
+        .receipt-body-preview {
+          font-size: 0.85rem;
+          line-height: 1.6;
+        }
+        
+        .receipt-line {
+          margin-bottom: 5px;
+          color: var(--street-black);
+        }
+        
+        .receipt-divider-preview {
+          border-top: 1px dashed #9ca3af;
+          margin: 15px 0;
+        }
+        
+        .receipt-item-line {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 5px;
+          font-size: 0.8rem;
+        }
+        
+        .receipt-total-line {
+          font-weight: bold;
+          font-size: 1rem;
+          color: var(--street-orange);
+          text-align: center;
+          margin-top: 10px;
+        }
         .success-actions {
           display: flex;
           flex-direction: column;
@@ -563,6 +887,29 @@ const Checkout = () => {
           max-width: 400px;
           margin: 0 auto;
         }
+        
+        .download-receipt-btn {
+          background: #6b7280;
+          color: white;
+          padding: 15px 30px;
+          border-radius: 12px;
+          font-weight: 700;
+          text-transform: uppercase;
+          transition: var(--transition);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          border: 2px solid #6b7280;
+        }
+        
+        .download-receipt-btn:hover {
+          background: #10b981;
+          border-color: #10b981;
+          transform: translateY(-2px);
+          box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+        }
+
         .download-btn-big {
           background: #10b981;
           color: white;
@@ -588,6 +935,191 @@ const Checkout = () => {
           transition: var(--transition);
         }
         .back-home-btn:hover { color: var(--street-orange); }
+
+        /* Receipt Modal */
+        .receipt-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.7);
+          backdrop-filter: blur(8px);
+          z-index: 2000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+
+        .receipt-modal {
+          background: white;
+          border-radius: 20px;
+          width: 100%;
+          max-width: 500px;
+          max-height: 90vh;
+          overflow-y: auto;
+          box-shadow: var(--shadow-lg);
+        }
+
+        .receipt-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 25px 30px;
+          border-bottom: 1px solid #e5e7eb;
+        }
+
+        .receipt-header h3 {
+          margin: 0;
+          color: var(--street-black);
+          font-size: 1.3rem;
+        }
+
+        .close-receipt {
+          background: none;
+          border: none;
+          font-size: 1.5rem;
+          color: var(--muted-gray);
+          cursor: pointer;
+          transition: var(--transition);
+        }
+
+        .close-receipt:hover {
+          color: var(--street-orange);
+        }
+
+        .receipt-content {
+          padding: 30px;
+        }
+
+        .receipt-paper {
+          background: #fafafa;
+          border: 2px dashed #d1d5db;
+          border-radius: 12px;
+          padding: 30px;
+          font-family: 'Courier New', monospace;
+        }
+
+        .receipt-header-section {
+          text-align: center;
+          margin-bottom: 30px;
+          padding-bottom: 20px;
+          border-bottom: 2px solid var(--street-orange);
+        }
+
+        .receipt-logo {
+          font-size: 3rem;
+          margin-bottom: 10px;
+        }
+
+        .receipt-header-section h2 {
+          margin: 0;
+          font-size: 1.8rem;
+          color: var(--street-black);
+          letter-spacing: 2px;
+        }
+
+        .receipt-header-section p {
+          margin: 5px 0 0 0;
+          color: var(--muted-gray);
+          font-size: 0.9rem;
+          letter-spacing: 1px;
+        }
+
+        .receipt-body {
+          line-height: 1.6;
+        }
+
+        .receipt-row {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 8px;
+          font-size: 0.9rem;
+        }
+
+        .receipt-section {
+          margin-bottom: 25px;
+        }
+
+        .receipt-section h4 {
+          margin: 0 0 10px 0;
+          color: var(--street-black);
+          font-weight: bold;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          font-size: 0.9rem;
+        }
+
+        .receipt-item {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 8px;
+          font-size: 0.85rem;
+        }
+
+        .receipt-divider {
+          border-top: 1px dashed #9ca3af;
+          margin: 20px 0;
+        }
+
+        .receipt-total {
+          display: flex;
+          justify-content: space-between;
+          font-weight: bold;
+          font-size: 1.1rem;
+          color: var(--street-orange);
+          margin-bottom: 20px;
+        }
+
+        .receipt-footer {
+          text-align: center;
+          margin-top: 20px;
+          border-top: 1px solid #e5e7eb;
+          padding-top: 15px;
+        }
+
+        .receipt-footer p {
+          margin: 5px 0;
+          font-size: 0.8rem;
+          color: var(--muted-gray);
+        }
+
+        .receipt-modal-actions {
+          padding: 20px 30px;
+          border-top: 1px solid #e5e7eb;
+          display: flex;
+          gap: 15px;
+        }
+
+        .download-from-modal {
+          flex: 1;
+          background: var(--street-orange);
+          color: white;
+          padding: 12px 20px;
+          border-radius: 10px;
+          font-weight: 700;
+          text-transform: uppercase;
+          transition: var(--transition);
+        }
+
+        .download-from-modal:hover {
+          background: var(--street-black);
+          transform: translateY(-1px);
+        }
+
+        .close-modal-btn {
+          padding: 12px 20px;
+          background: #f3f4f6;
+          color: var(--muted-gray);
+          border-radius: 10px;
+          font-weight: 600;
+          transition: var(--transition);
+        }
+
+        .close-modal-btn:hover {
+          background: #e5e7eb;
+        }
 
         .submit-order-btn:disabled {
           opacity: 0.5;
@@ -739,6 +1271,12 @@ const Checkout = () => {
           .checkout-header h1 {
             font-size: 2.8rem;
           }
+          .checkout-instruction-banner {
+            padding: 15px 20px;
+          }
+          .checkout-instruction-banner p {
+            font-size: 0.95rem;
+          }
           .details-form {
             padding: 25px;
           }
@@ -750,6 +1288,12 @@ const Checkout = () => {
         @media (max-width: 480px) {
           .checkout-header h1 {
             font-size: 2.2rem;
+          }
+          .checkout-instruction-banner {
+            padding: 12px 15px;
+          }
+          .checkout-instruction-banner p {
+            font-size: 0.85rem;
           }
           .section-title h3 {
             font-size: 1.1rem;

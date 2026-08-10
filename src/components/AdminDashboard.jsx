@@ -339,6 +339,40 @@ const AdminDashboard = () => {
     setIsAuthenticated(false);
   };
 
+  const downloadCSV = () => {
+    // Create CSV content
+    const headers = ['Order ID', 'Customer Name', 'Phone', 'Items', 'Total Price', 'Status', 'Special Request', 'Date/Time'];
+    const rows = orders.map(order => {
+      const items = order.order_items?.map(it => `${it.quantity}x ${it.item_name}`).join('; ') || '';
+      return [
+        order.id,
+        order.customer_name,
+        order.customer_phone || 'N/A',
+        items,
+        order.total_price.toFixed(2),
+        order.status,
+        order.special_request || 'None',
+        new Date(order.created_at).toLocaleString()
+      ];
+    });
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    // Create download link
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `street-sushi-orders-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (isLoading) {
     return <div className="login-container">Loading...</div>;
   }
@@ -549,8 +583,6 @@ const AdminDashboard = () => {
              'Settings'}
           </h2>
           <div className="admin-user">
-            <span className="user-role">Super Admin</span>
-            <div className="user-avatar">A</div>
           </div>
         </header>
 
@@ -632,9 +664,18 @@ const AdminDashboard = () => {
                     <span className="stat-value">₱{orders.reduce((sum, o) => sum + (o.total_price || 0), 0).toFixed(2)}</span>
                   </div>
                 </div>
-                <button className="refresh-btn" onClick={fetchOrders} disabled={isFetchingOrders}>
-                   {isFetchingOrders ? 'Updating...' : 'Refresh Orders'}
-                </button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button className="download-csv-btn" onClick={downloadCSV} disabled={orders.length === 0}>
+                    📥 Download CSV
+                  </button>
+                  <button className="refresh-btn" onClick={fetchOrders} disabled={isFetchingOrders}>
+                    {isFetchingOrders ? 'Updating...' : 'Refresh Orders'}
+                  </button>
+                </div>
+              </div>
+              
+              <div className="csv-help-text">
+                <p>💡 <strong>Tip:</strong> Click "Download CSV" to export all orders as an Excel file for data backup and analysis.</p>
               </div>
 
               <div className="table-container">
@@ -1376,6 +1417,49 @@ const AdminDashboard = () => {
           cursor: pointer;
         }
         .refresh-btn:hover { background: #f9fafb; border-color: #d1d5db; }
+        
+        .download-csv-btn {
+          padding: 8px 16px;
+          border-radius: 8px;
+          background: #10b981;
+          border: 1px solid #10b981;
+          color: white;
+          font-weight: 700;
+          font-size: 0.85rem;
+          cursor: pointer;
+          transition: var(--transition);
+        }
+        .download-csv-btn:hover {
+          background: #059669;
+          border-color: #059669;
+          transform: translateY(-1px);
+        }
+        .download-csv-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          transform: none;
+        }
+        
+        .csv-help-text {
+          margin-top: 15px;
+          padding: 12px 20px;
+          background: #f0f9ff;
+          border: 1px solid #bae6fd;
+          border-radius: 10px;
+          border-left: 4px solid #0284c7;
+        }
+        
+        .csv-help-text p {
+          margin: 0;
+          font-size: 0.85rem;
+          color: #0f172a;
+          line-height: 1.4;
+        }
+        
+        .csv-help-text strong {
+          color: #0284c7;
+          font-weight: 700;
+        }
 
         .settings-card {
           background: white;

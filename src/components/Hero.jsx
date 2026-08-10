@@ -40,7 +40,8 @@ const Hero = () => {
   }, [slides]);
 
   return (
-    <section id="hero" className="hero-split">
+    <>
+      <section id="hero" className="hero-split">
       {/* Left Side: Slideshow */}
       <div className="hero-left">
         {slides.length > 0 ? (
@@ -203,8 +204,170 @@ const Hero = () => {
             font-size: 0.75rem;
           }
         }
+
+        /* How to Order Section Styles */
+        .how-to-order {
+          padding: 80px 10%;
+          background: white;
+          position: relative;
+          z-index: 5;
+          border-top: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .how-container {
+          max-width: 1400px;
+          margin: 0 auto;
+          text-align: center;
+        }
+
+        .how-subtitle {
+          color: var(--street-orange);
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          font-size: 0.85rem;
+          display: block;
+          margin-bottom: 10px;
+        }
+
+        .how-title {
+          font-size: 3rem;
+          font-family: var(--font-brush);
+          color: var(--street-black);
+          margin-bottom: 50px;
+        }
+
+        .how-title span {
+          color: var(--street-orange);
+        }
+
+        .how-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 30px;
+        }
+
+        .how-card {
+          background: #f8fafc;
+          padding: 40px 30px;
+          border-radius: 24px;
+          border: 1px solid #f1f5f9;
+          text-align: left;
+          transition: var(--transition);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .how-card:hover {
+          transform: translateY(-5px);
+          box-shadow: var(--shadow-md);
+          border-color: rgba(255, 107, 0, 0.15);
+          background: white;
+        }
+
+        .how-step-num {
+          font-size: 3.5rem;
+          font-weight: 900;
+          font-family: var(--font-main);
+          line-height: 1;
+          margin-bottom: 20px;
+          transition: var(--transition);
+          opacity: 0.75;
+        }
+
+        .how-card:nth-child(1) .how-step-num {
+          color: #ef4444; /* Vibrant Red */
+        }
+        .how-card:nth-child(2) .how-step-num {
+          color: #ff6b00; /* Street Orange */
+        }
+        .how-card:nth-child(3) .how-step-num {
+          color: #eab308; /* Amber Gold */
+        }
+        .how-card:nth-child(4) .how-step-num {
+          color: #10b981; /* Emerald Green */
+        }
+
+        .how-card:hover .how-step-num {
+          opacity: 1;
+          transform: scale(1.1);
+        }
+
+        .how-card:nth-child(1):hover .how-step-num {
+          text-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+        }
+        .how-card:nth-child(2):hover .how-step-num {
+          text-shadow: 0 0 15px rgba(255, 107, 0, 0.4);
+        }
+        .how-card:nth-child(3):hover .how-step-num {
+          text-shadow: 0 0 15px rgba(234, 179, 8, 0.4);
+        }
+        .how-card:nth-child(4):hover .how-step-num {
+          text-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .how-card h3 {
+          font-size: 1.25rem;
+          color: var(--street-black);
+          margin-bottom: 12px;
+          font-weight: 700;
+        }
+
+        .how-card p {
+          color: var(--muted-gray);
+          font-size: 0.95rem;
+          line-height: 1.6;
+        }
+
+        @media (max-width: 1024px) {
+          .how-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        @media (max-width: 600px) {
+          .how-grid {
+            grid-template-columns: 1fr;
+          }
+          .how-to-order {
+            padding: 60px 5%;
+          }
+          .how-title {
+            font-size: 2.5rem;
+          }
+        }
       `}</style>
     </section>
+
+    <section className="how-to-order">
+      <div className="how-container">
+        <span className="how-subtitle">Step-by-Step</span>
+        <h2 className="how-title">How to <span>Order</span></h2>
+        <div className="how-grid">
+          <div className="how-card">
+            <div className="how-step-num">01</div>
+            <h3>Browse Menu</h3>
+            <p>Explore our premium nigiri, sashimi, maki, and drinks curated by our master chefs.</p>
+          </div>
+          <div className="how-card">
+            <div className="how-step-num">02</div>
+            <h3>Add to Bag</h3>
+            <p>Select your favorite dishes and review your order total inside your digital bag.</p>
+          </div>
+          <div className="how-card">
+            <div className="how-step-num">03</div>
+            <h3>Download Receipt</h3>
+            <p>Provide your name to generate and automatically download your transaction receipt.</p>
+          </div>
+          <div className="how-card">
+            <div className="how-step-num">04</div>
+            <h3>Claim at Counter</h3>
+            <p>Present your receipt at the counter to pay, receive your sushi, and enjoy!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </>
   );
 };
 

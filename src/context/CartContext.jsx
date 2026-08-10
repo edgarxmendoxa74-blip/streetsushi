@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 
 const CartContext = createContext();
 
@@ -13,10 +14,24 @@ export const CartProvider = ({ children }) => {
     });
 
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [activeCategory, setActiveCategory] = useState("All");
+    const [categories, setCategories] = useState(["All"]);
 
     useEffect(() => {
         localStorage.setItem('cart', JSON.stringify(cart));
     }, [cart]);
+
+    // Fetch categories from Supabase
+    useEffect(() => {
+        const fetchCategories = async () => {
+            const { data: catData } = await supabase.from('categories').select('name');
+            if (catData) {
+                setCategories(["All", ...catData.map(c => c.name)]);
+            }
+        };
+        fetchCategories();
+    }, []);
 
     const addToCart = (item) => {
         setCart(prevCart => {
@@ -67,7 +82,13 @@ export const CartProvider = ({ children }) => {
             updateQuantity,
             clearCart,
             cartTotal,
-            cartCount
+            cartCount,
+            searchQuery,
+            setSearchQuery,
+            activeCategory,
+            setActiveCategory,
+            categories,
+            setCategories
         }}>
             {children}
         </CartContext.Provider>

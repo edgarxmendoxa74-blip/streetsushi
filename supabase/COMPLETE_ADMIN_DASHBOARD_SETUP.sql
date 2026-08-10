@@ -67,6 +67,7 @@ CREATE TABLE IF NOT EXISTS orders (
     total_price DECIMAL(10,2) NOT NULL,
     status TEXT DEFAULT 'pending', -- pending, confirmed, preparing, completed, cancelled
     order_type TEXT DEFAULT 'walk-in',
+    special_request TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
