@@ -71,7 +71,7 @@ const Footer = () => {
             <div className="contact-list">
               <div className="contact-item-row">
                 <div className="icon-circle"><Phone size={18} /></div>
-                <div>
+                <div className="contact-item-content">
                   <label>Call or Message</label>
                   <a href={`tel:${contactInfo?.contact_number}`} className="contact-link">
                     {contactInfo?.contact_number || '+63 9XX XXX XXXX'}
@@ -80,7 +80,7 @@ const Footer = () => {
               </div>
               <div className="contact-item-row">
                 <div className="icon-circle"><MapPin size={18} /></div>
-                <div>
+                <div className="contact-item-content">
                   <label>Find Us</label>
                   <span className="contact-text">{contactInfo?.location || '123 Street, City'}</span>
                 </div>
@@ -111,242 +111,298 @@ const Footer = () => {
 
       <style jsx="true">{`
         .site-footer {
-          background: #111111;
+          background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
           color: #f3f4f6;
-          padding: 80px 10% 30px;
-          border-top: 3px solid var(--street-orange);
+          padding: 60px 5% 0;
+          border-top: 4px solid var(--street-orange);
           position: relative;
-          z-index: 5;
+          overflow: hidden;
+        }
+
+        .site-footer::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, var(--street-orange), transparent);
+          opacity: 0.5;
         }
 
         .footer-container {
           max-width: 1400px;
           margin: 0 auto;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          text-align: center;
-          gap: 60px;
-          margin-bottom: 50px;
+          padding-bottom: 40px;
         }
 
         .footer-content-grid {
           display: grid;
-          grid-template-columns: 1.5fr 1fr 1fr;
-          gap: 60px;
+          grid-template-columns: 2fr 1fr 1fr;
+          gap: 50px;
           width: 100%;
-          max-width: 1200px;
         }
 
+        /* Brand Section */
         .footer-brand {
-          text-align: center;
+          text-align: left;
+        }
+
+        .footer-logo-wrapper {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          margin-bottom: 20px;
+        }
+
+        .footer-logo {
+          width: 60px;
+          height: 60px;
+          border-radius: 12px;
+          border: 2px solid var(--street-orange);
+          object-fit: cover;
+          box-shadow: 0 4px 15px rgba(255, 107, 0, 0.2);
         }
 
         .footer-brand h3 {
           font-family: var(--font-brush);
-          font-size: 2.2rem;
+          font-size: 2.5rem;
           margin: 0;
           color: white;
+          line-height: 1;
         }
 
         .footer-brand h3 span {
           color: var(--street-orange);
         }
 
-        .footer-logo-wrapper {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 15px;
-          margin-bottom: 20px;
-        }
-
-        .footer-logo {
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-          border: 2px solid white;
-          object-fit: cover;
-        }
-
         .footer-tagline {
           color: #9ca3af;
           font-size: 0.95rem;
-          line-height: 1.6;
-          margin: 0 auto 25px;
+          line-height: 1.7;
+          margin: 20px 0 30px;
           max-width: 400px;
         }
 
         .footer-socials {
           display: flex;
           gap: 12px;
-          justify-content: center;
-        }
-
-        .footer-contact,
-        .footer-hours {
-          text-align: center;
-        }
-
-        .contact-list,
-        .hours-list {
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-          align-items: center;
-        }
-
-        .contact-item-row {
-          display: flex;
-          align-items: flex-start;
-          gap: 15px;
-          text-align: left;
         }
 
         .social-icon {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          background: #222222;
+          width: 45px;
+          height: 45px;
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.05);
           color: white;
           display: flex;
           align-items: center;
           justify-content: center;
           transition: var(--transition);
-          border: 1px solid rgba(255,255,255,0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(10px);
         }
 
         .social-icon:hover {
           background: var(--street-orange);
           color: white;
-          transform: translateY(-3px);
-          box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3);
+          transform: translateY(-5px);
+          box-shadow: 0 8px 20px rgba(255, 107, 0, 0.4);
+          border-color: var(--street-orange);
+        }
+
+        /* Contact & Hours Sections */
+        .footer-contact,
+        .footer-hours {
+          text-align: left;
         }
 
         .site-footer h4 {
-          font-size: 1.1rem;
+          font-size: 1.2rem;
           text-transform: uppercase;
-          letter-spacing: 2px;
-          color: var(--street-orange);
+          letter-spacing: 1.5px;
+          color: white;
           margin-bottom: 25px;
-          position: relative;
-          padding-bottom: 10px;
           font-weight: 700;
-          display: flex;
-          justify-content: center;
-          align-items: center;
+          position: relative;
+          padding-bottom: 12px;
         }
 
         .site-footer h4::after {
           content: '';
           position: absolute;
           bottom: 0;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 30px;
-          height: 2px;
+          left: 0;
+          width: 40px;
+          height: 3px;
           background: var(--street-orange);
+          border-radius: 2px;
         }
 
-        .contact-list, .hours-list {
+        .contact-list,
+        .hours-list {
           display: flex;
           flex-direction: column;
-          gap: 20px;
+          gap: 18px;
+        }
+
+        .contact-item-row {
+          display: flex;
+          align-items: flex-start;
+          gap: 15px;
+        }
+
+        .contact-item-content {
+          flex: 1;
+          min-height: 52px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
         }
 
         .icon-circle {
-          width: 38px;
-          height: 38px;
-          border-radius: 50%;
+          width: 42px;
+          height: 42px;
+          border-radius: 10px;
           background: rgba(255, 107, 0, 0.1);
           color: var(--street-orange);
           display: flex;
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
-          border: 1px solid rgba(255, 107, 0, 0.2);
+          border: 1px solid rgba(255, 107, 0, 0.3);
         }
 
         .contact-item-row label {
           display: block;
-          font-size: 0.75rem;
+          font-size: 0.7rem;
           text-transform: uppercase;
-          color: #9ca3af;
-          letter-spacing: 1px;
-          margin-bottom: 3px;
+          color: #6b7280;
+          letter-spacing: 1.2px;
+          margin-bottom: 5px;
+          font-weight: 600;
         }
 
         .contact-link {
-          font-weight: 700;
-          color: white;
+          font-weight: 600;
+          color: #ffffff;
           font-size: 1rem;
           transition: var(--transition);
+          display: inline-block;
         }
 
         .contact-link:hover {
           color: var(--street-orange);
+          transform: translateX(3px);
         }
 
         .contact-text {
-          color: white;
+          color: #e5e7eb;
           font-weight: 500;
           font-size: 0.95rem;
-          line-height: 1.5;
+          line-height: 1.6;
           display: block;
         }
 
         .hours-text {
-          color: white;
+          color: #e5e7eb;
           font-size: 0.95rem;
-          margin-bottom: 8px;
+          margin-bottom: 10px;
+          line-height: 1.6;
         }
 
         .hours-text strong {
           color: #9ca3af;
-          font-weight: 500;
+          font-weight: 600;
+          display: inline-block;
+          min-width: 100px;
         }
 
+        /* Footer Bottom */
         .footer-bottom {
-          margin-top: 60px;
-          padding-top: 30px;
-          border-top: 1px solid #222222;
+          margin-top: 50px;
+          padding: 25px 0;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
           text-align: center;
           color: #6b7280;
-          font-size: 0.85rem;
+          font-size: 0.9rem;
+          background: rgba(0, 0, 0, 0.2);
         }
 
+        /* Responsive Design */
         @media (max-width: 1024px) {
           .footer-content-grid {
-            grid-template-columns: 1.2fr 1fr;
+            grid-template-columns: 1.5fr 1fr 1fr;
             gap: 40px;
-          }
-          .footer-hours {
-            grid-column: span 2;
-            justify-self: center;
           }
         }
 
         @media (max-width: 768px) {
           .site-footer {
-            padding: 60px 5% 30px;
+            padding: 50px 6% 0;
           }
+
           .footer-content-grid {
             grid-template-columns: 1fr;
             gap: 40px;
-            text-align: center;
           }
-          .footer-hours {
-            grid-column: span 1;
-          }
-          
+
           .footer-brand,
           .footer-contact,
           .footer-hours {
             text-align: center;
           }
-          
+
+          .footer-logo-wrapper {
+            justify-content: center;
+          }
+
+          .footer-tagline {
+            margin-left: auto;
+            margin-right: auto;
+          }
+
+          .footer-socials {
+            justify-content: center;
+          }
+
+          .site-footer h4::after {
+            left: 50%;
+            transform: translateX(-50%);
+          }
+
           .contact-item-row {
             justify-content: center;
+            text-align: left;
+          }
+
+          .hours-text strong {
+            min-width: 90px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .footer-brand h3 {
+            font-size: 2rem;
+          }
+
+          .footer-logo {
+            width: 50px;
+            height: 50px;
+          }
+
+          .social-icon {
+            width: 40px;
+            height: 40px;
+          }
+
+          .icon-circle {
+            width: 38px;
+            height: 38px;
+          }
+
+          .site-footer h4 {
+            font-size: 1rem;
           }
         }
       `}</style>
