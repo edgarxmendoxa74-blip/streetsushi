@@ -1,25 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Info, ChevronLeft, ChevronRight, ShoppingCart } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Info, ShoppingCart } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useCart } from '../context/CartContext';
 
 const Menu = () => {
-  const [activeCategory, setActiveCategory] = useState("All");
   const [selectedItem, setSelectedItem] = useState(null);
   const [menuItems, setMenuItems] = useState([]);
-  const [categories, setCategories] = useState(["All"]);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-  const scrollRef = useRef(null);
-  const { addToCart, searchQuery } = useCart();
+  const { addToCart, searchQuery, activeCategory } = useCart();
 
   useEffect(() => {
     const fetchMenu = async () => {
-      const { data: catData } = await supabase.from('categories').select('name');
-      if (catData) {
-        setCategories(["All", ...catData.map(c => c.name)]);
-      }
-
       const { data: itemData } = await supabase
         .from('menu_items')
         .select(`
@@ -46,21 +36,6 @@ const Menu = () => {
     fetchMenu();
   }, []);
 
-  const handleScroll = () => {
-    if (scrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-      setCanScrollLeft(scrollLeft > 10);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-    }
-  };
-
-  const scroll = (direction) => {
-    if (scrollRef.current) {
-      const scrollAmount = 300;
-      scrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
-    }
-  };
-
   const filteredItems = menuItems.filter(item => {
     const matchesCategory = activeCategory === "All" || item.category === activeCategory;
     const matchesSearch = (item.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -74,42 +49,6 @@ const Menu = () => {
       <div className="section-header">
         <span className="subtitle">Exploration</span>
         <h2>Our <span>Menu</span></h2>
-      </div>
-
-      <div className="filter-wrapper">
-        {canScrollLeft && (
-          <button 
-            className="scroll-btn left" 
-            onClick={() => scroll('left')}
-          >
-            <ChevronLeft size={20} />
-          </button>
-        )}
-        
-        <div 
-          className="filter-container"
-          ref={scrollRef}
-          onScroll={handleScroll}
-        >
-          {categories.map(cat => (
-            <button 
-              key={cat} 
-              className={`filter-btn ${activeCategory === cat ? 'active' : ''}`}
-              onClick={() => setActiveCategory(cat)}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        {canScrollRight && (
-          <button 
-            className="scroll-btn right" 
-            onClick={() => scroll('right')}
-          >
-            <ChevronRight size={20} />
-          </button>
-        )}
       </div>
 
       <div className="menu-grid">
@@ -263,13 +202,6 @@ const Menu = () => {
           color: var(--muted-gray);
         }
 
-        .filter-wrapper {
-          position: relative;
-          margin-bottom: 60px;
-          padding: 10px 0;
-          overflow: hidden;
-        }
-
         .featured-card {
            border-color: var(--street-orange) !important;
            box-shadow: 0 15px 40px rgba(255, 107, 0, 0.15) !important;
@@ -289,74 +221,6 @@ const Menu = () => {
           letter-spacing: 1px;
           z-index: 5;
           box-shadow: 0 4px 10px rgba(255, 107, 0, 0.3);
-        }
-
-        .scroll-btn {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          z-index: 10;
-          background: white;
-          color: var(--street-black);
-          border: 1px solid var(--glass-border);
-          border-radius: 50%;
-          width: 40px;
-          height: 40px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          box-shadow: var(--shadow-sm);
-          transition: var(--transition);
-        }
-        
-        .scroll-btn:hover {
-          background: var(--street-orange);
-          color: white;
-          border-color: var(--street-orange);
-          box-shadow: var(--shadow-md);
-        }
-
-        .scroll-btn.left {
-          left: 10px;
-        }
-
-        .scroll-btn.right {
-          right: 10px;
-        }
-
-        .filter-container {
-          display: flex;
-          gap: 15px;
-          padding: 10px 20px;
-          overflow-x: auto;
-          scroll-behavior: smooth;
-          scrollbar-width: none;
-          justify-content: center;
-        }
-
-        .filter-btn {
-          flex: 0 0 auto;
-          padding: 10px 28px;
-          border: 1px solid var(--glass-border);
-          background: white;
-          color: var(--muted-gray);
-          font-weight: 600;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-          font-size: 0.85rem;
-          transition: var(--transition);
-          border-radius: 50px;
-          cursor: pointer;
-          white-space: nowrap;
-          box-shadow: var(--shadow-sm);
-        }
-
-        .filter-btn:hover, .filter-btn.active {
-          border-color: var(--street-orange);
-          color: white;
-          background: var(--street-orange);
-          box-shadow: 0 4px 15px rgba(255, 107, 0, 0.2);
         }
 
         .menu-grid {
