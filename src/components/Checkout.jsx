@@ -187,9 +187,6 @@ const Checkout = () => {
     }
     
     setIsSubmitting(true);
-    // Capture cart items and total for the summary/copy before clearing
-    setPlacedOrderItems([...cart]);
-    setPlacedOrderTotal(cartTotal);
 
     try {
       // Validate cart has items
@@ -252,8 +249,21 @@ const Checkout = () => {
         throw new Error(`Failed to add items to order: ${itemsError.message}`);
       }
 
-      // Store the order reference number (first 8 characters of UUID)
-      setPlacedOrderRef(order.id.slice(0, 8));
+      // Store the order reference number and cart data (first 8 characters of UUID)
+      const orderRef = order.id.slice(0, 8);
+      const orderedItems = [...cart];
+      const orderedTotal = cartTotal;
+      
+      console.log('Order completed - storing data:', {
+        orderRef,
+        itemCount: orderedItems.length,
+        total: orderedTotal
+      });
+      
+      setPlacedOrderRef(orderRef);
+      setPlacedOrderItems(orderedItems);
+      setPlacedOrderTotal(orderedTotal);
+      
       setOrderSuccess(true);
       clearCart();
     } catch (err) {
