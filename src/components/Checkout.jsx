@@ -291,7 +291,8 @@ const Checkout = () => {
                   )}
                   
                   <div className="receipt-total-line">
-                    <span>TOTAL: ₱{cartTotal.toFixed(2)}</span>
+                    <span>TOTAL:</span>
+                    <span>₱{cartTotal.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -926,11 +927,15 @@ const Checkout = () => {
         }
         
         .receipt-total-line {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
           font-weight: bold;
           font-size: 1rem;
           color: var(--street-orange);
-          text-align: center;
           margin-top: 10px;
+          padding-top: 8px;
+          border-top: 2px solid #f0f0f0;
         }
         .success-actions {
           display: flex;
