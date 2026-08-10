@@ -474,6 +474,15 @@ const Checkout = () => {
                     ))}
                   </div>
 
+                  {customerDetails.specialRequest && (
+                    <div className="receipt-section">
+                      <h4>Special Request:</h4>
+                      <p style={{ fontSize: '0.9rem', color: '#666666', marginTop: '8px', fontWeight: '500' }}>
+                        {customerDetails.specialRequest}
+                      </p>
+                    </div>
+                  )}
+
                   <div className="receipt-divider"></div>
                   
                   <div className="receipt-total">
