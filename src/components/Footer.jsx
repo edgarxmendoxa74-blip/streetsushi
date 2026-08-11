@@ -45,13 +45,11 @@ const Footer = () => {
               <img src={logo} alt="Street Sushi Logo" className="footer-logo" />
               <h3>Street <span>Sushi</span></h3>
             </div>
-            <p className="footer-tagline">Artistry in Every Bite. Fresh cuts, master-crafted recipes, and the true soul of Tokyo street sushi.</p>
+            <p className="footer-tagline">Experience Gastronomy by the Street</p>
             <div className="footer-socials">
-              {contactInfo?.fb_url && (
-                <a href={contactInfo.fb_url} target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Facebook">
-                  <FacebookIcon />
-                </a>
-              )}
+              <a href="https://www.facebook.com/streetsushi09" target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Facebook">
+                <FacebookIcon />
+              </a>
               {contactInfo?.ig_url && (
                 <a href={contactInfo.ig_url} target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Instagram">
                   <InstagramIcon />
@@ -95,8 +93,8 @@ const Footer = () => {
               <div className="contact-item-row">
                 <div className="icon-circle"><Clock size={18} /></div>
                 <div>
-                  <p className="hours-text"><strong>Mon - Sat:</strong> 10:00 AM - 9:00 PM</p>
-                  <p className="hours-text"><strong>Sunday:</strong> 11:00 AM - 8:00 PM</p>
+                  <p className="hours-text"><strong>Daily:</strong> 6:00 PM - 11:00 PM</p>
+                  <p className="hours-note">Check our Facebook page for updates</p>
                 </div>
               </div>
             </div>
@@ -316,6 +314,13 @@ const Footer = () => {
           font-weight: 600;
           display: inline-block;
           min-width: 100px;
+        }
+
+        .hours-note {
+          font-size: 0.85rem;
+          color: #9ca3af;
+          margin-top: 8px;
+          font-style: italic;
         }
 
         /* Footer Bottom */
