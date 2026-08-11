@@ -136,9 +136,10 @@ const Footer = () => {
 
         .footer-content-grid {
           display: grid;
-          grid-template-columns: 2fr 1fr 1fr;
-          gap: 50px;
+          grid-template-columns: 1.5fr 1.2fr 1.2fr;
+          gap: 60px;
           width: 100%;
+          align-items: start;
         }
 
         /* Brand Section */
@@ -175,11 +176,12 @@ const Footer = () => {
         }
 
         .footer-tagline {
-          color: #9ca3af;
-          font-size: 0.95rem;
-          line-height: 1.7;
-          margin: 20px 0 30px;
+          color: #d1d5db;
+          font-size: 1rem;
+          line-height: 1.8;
+          margin: 25px 0 35px;
           max-width: 400px;
+          font-weight: 400;
         }
 
         .footer-socials {
@@ -273,20 +275,21 @@ const Footer = () => {
 
         .contact-item-row label {
           display: block;
-          font-size: 0.7rem;
+          font-size: 0.75rem;
           text-transform: uppercase;
-          color: #6b7280;
-          letter-spacing: 1.2px;
-          margin-bottom: 5px;
-          font-weight: 600;
+          color: var(--street-orange);
+          letter-spacing: 1.5px;
+          margin-bottom: 6px;
+          font-weight: 700;
         }
 
         .contact-link {
-          font-weight: 600;
+          font-weight: 700;
           color: #ffffff;
-          font-size: 1rem;
+          font-size: 1.05rem;
           transition: var(--transition);
           display: inline-block;
+          letter-spacing: 0.3px;
         }
 
         .contact-link:hover {
@@ -295,31 +298,33 @@ const Footer = () => {
         }
 
         .contact-text {
-          color: #e5e7eb;
+          color: #ffffff;
           font-weight: 500;
-          font-size: 0.95rem;
+          font-size: 1rem;
           line-height: 1.6;
           display: block;
         }
 
         .hours-text {
-          color: #e5e7eb;
-          font-size: 0.95rem;
+          color: #ffffff;
+          font-size: 1rem;
           margin-bottom: 10px;
           line-height: 1.6;
+          font-weight: 500;
         }
 
         .hours-text strong {
-          color: #9ca3af;
-          font-weight: 600;
+          color: var(--street-orange);
+          font-weight: 700;
           display: inline-block;
-          min-width: 100px;
+          min-width: 60px;
+          margin-right: 8px;
         }
 
         .hours-note {
           font-size: 0.85rem;
           color: #9ca3af;
-          margin-top: 8px;
+          margin-top: 10px;
           font-style: italic;
         }
 
