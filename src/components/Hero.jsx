@@ -341,28 +341,28 @@ const Hero = () => {
 
     <section className="how-to-order">
       <div className="how-container">
-        <span className="how-subtitle">Step-by-Step</span>
+        <span className="how-subtitle">Simple & Easy</span>
         <h2 className="how-title">How to <span>Order</span></h2>
         <div className="how-grid">
           <div className="how-card">
             <div className="how-step-num">01</div>
             <h3>Browse Menu</h3>
-            <p>Explore our premium nigiri, sashimi, maki, and drinks curated by our master chefs.</p>
+            <p>Choose your favorite sushi from our menu.</p>
           </div>
           <div className="how-card">
             <div className="how-step-num">02</div>
-            <h3>Add to Bag</h3>
-            <p>Select your favorite dishes and review your order total inside your digital bag.</p>
+            <h3>Add to Cart</h3>
+            <p>Click "Add to Cart" and review your order.</p>
           </div>
           <div className="how-card">
             <div className="how-step-num">03</div>
-            <h3>Download Receipt</h3>
-            <p>Provide your name to generate and automatically download your transaction receipt.</p>
+            <h3>Submit Order</h3>
+            <p>Click "Submit Order" to generate your receipt.</p>
           </div>
           <div className="how-card">
             <div className="how-step-num">04</div>
-            <h3>Claim at Counter</h3>
-            <p>Present your receipt at the counter to pay, receive your sushi, and enjoy!</p>
+            <h3>Show & Pay</h3>
+            <p>Present receipt at counter, pay, and enjoy!</p>
           </div>
         </div>
       </div>
